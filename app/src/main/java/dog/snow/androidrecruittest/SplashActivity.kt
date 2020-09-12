@@ -1,9 +1,11 @@
 package dog.snow.androidrecruittest
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,6 +21,7 @@ import dog.snow.androidrecruittest.ui.FunHolder.Companion.getRawAlbumsFromURL
 import dog.snow.androidrecruittest.ui.FunHolder.Companion.getRawUsersFromURL
 import dog.snow.androidrecruittest.ui.FunHolder.Companion.initDetailsList
 import dog.snow.androidrecruittest.ui.FunHolder.Companion.initItemsList
+import dog.snow.androidrecruittest.ui.ListFragment
 import dog.snow.androidrecruittest.ui.model.Detail
 import dog.snow.androidrecruittest.ui.model.ListItem
 import org.json.JSONArray
@@ -41,8 +44,8 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
     private var itemsList:MutableList<ListItem>? = mutableListOf()
     private var detailsList:MutableList<Detail>? = mutableListOf()
 
-    private lateinit var viewAdapter: RecyclerView.Adapter<*>
-    private lateinit var viewManager: RecyclerView.LayoutManager
+    private lateinit var viewAdapter: dog.snow.androidrecruittest.ui.adapter.ListAdapter
+    private lateinit var viewManager: androidx.recyclerview.widget.LinearLayoutManager
 
     companion object{
         public var albumIdLimit:Int = 0
@@ -57,12 +60,21 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
         loadJSONDataUsingExecutors()
         setContentView(R.layout.list_fragment)
         viewManager = LinearLayoutManager(this)
-        viewAdapter = dog.snow.androidrecruittest.ui.adapter.ListAdapter()
+        viewAdapter = dog.snow.androidrecruittest.ui.adapter.ListAdapter{
+                item: ListItem, position: Int, view: View -> println("clicked $position")
+        }
+
+        viewAdapter.submitList(itemsList)
+        viewAdapter.notifyDataSetChanged()
+
         val searchText = findViewById<TextInputEditText>(R.id.et_search)
-        //val photosView = findViewById<RecyclerView>(R.id.rv_items).apply{
-        //    layoutManager = viewManager
-        //    adapter = viewAdapter
-        //}
+        var photosView = findViewById<RecyclerView>(R.id.rv_items).apply{
+            layoutManager = viewManager
+            adapter = viewAdapter
+        }
+
+
+
 
         searchText.addTextChangedListener(object : TextWatcher {
 
@@ -77,11 +89,12 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
             override fun onTextChanged(s: CharSequence, start: Int,
                                        before: Int, count: Int) {
                 Toast.makeText(this@SplashActivity, searchText.text, Toast.LENGTH_SHORT).show()
-                println(detailsList)
-                println(detailsList?.size)
+                viewAdapter.submitList(itemsList)
+                viewAdapter.notifyDataSetChanged()
+                println(viewAdapter.currentList)
+                println(viewAdapter.currentList.size)
             }
         })
-
     }
 
     private fun showError(errorMessage: String?) {

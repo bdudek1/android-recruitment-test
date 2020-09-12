@@ -1,5 +1,6 @@
 package dog.snow.androidrecruittest.ui.adapter
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +16,7 @@ class ListAdapter(private val onClick: (item: ListItem, position: Int, view: Vie
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val itemView =
             LayoutInflater.from(parent.context).inflate(R.layout.list_item, parent, false)
+        println("ON CREATE VIEW HOLDER")
         return ViewHolder(itemView, onClick)
     }
 
@@ -27,15 +29,18 @@ class ListAdapter(private val onClick: (item: ListItem, position: Int, view: Vie
     ) :
         RecyclerView.ViewHolder(itemView) {
         fun bind(item: ListItem) = with(itemView) {
+            println("ON BIND")
             val ivThumb: ImageView = findViewById(R.id.iv_thumb)
             val tvTitle: TextView = findViewById(R.id.tv_photo_title)
             val tvAlbumTitle: TextView = findViewById(R.id.tv_album_title)
             tvTitle.text = item.title
             tvAlbumTitle.text = item.albumTitle
+            ivThumb.setImageURI(Uri.parse(item.thumbnailUrl))
             //TODO: display item.thumbnailUrl in ivThumb
             setOnClickListener { onClick(item, adapterPosition, this) }
         }
     }
+
 
     companion object {
         private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<ListItem>() {

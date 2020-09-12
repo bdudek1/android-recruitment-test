@@ -40,5 +40,4 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/iv_logo_sd_symbol"
         tools:visibility="visible" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
