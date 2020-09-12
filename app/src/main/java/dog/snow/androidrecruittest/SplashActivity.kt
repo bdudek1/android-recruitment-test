@@ -6,45 +6,53 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.addTextChangedListener
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import dog.snow.androidrecruittest.repository.model.RawAlbum
 import dog.snow.androidrecruittest.repository.model.RawPhoto
+import dog.snow.androidrecruittest.repository.model.RawUser
+import dog.snow.androidrecruittest.ui.FunHolder.Companion.extractRawPhotosFromJSONArray
+import dog.snow.androidrecruittest.ui.FunHolder.Companion.getJsonFromURL
+import dog.snow.androidrecruittest.ui.FunHolder.Companion.getRawAlbumsFromURL
+import dog.snow.androidrecruittest.ui.FunHolder.Companion.getRawUsersFromURL
 import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
-import java.net.URL
+import java.io.IOException
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
 
-    var LIMIT_OF_PHOTOS:Int = 100
-    var PHOTOS_URL:String = "https://jsonplaceholder.typicode.com/photos?_limit=$LIMIT_OF_PHOTOS"
+    private val LIMIT_OF_PHOTOS:Int = 100
+    private val PHOTOS_URL:String = "https://jsonplaceholder.typicode.com/photos?_limit=$LIMIT_OF_PHOTOS"
+    private val executorService:ExecutorService = Executors.newSingleThreadExecutor()
+
+    private var rawPhotosList:MutableList<RawPhoto>? = mutableListOf()
+    private var rawAlbumList:MutableList<RawAlbum>? = mutableListOf()
+    private var rawUsersList:MutableList<RawUser>? = mutableListOf()
 
     @SuppressLint("ResourceType")
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
+        loadJSONDataUsingExecutors()
         setContentView(R.layout.list_fragment)
-        var jsonArray:JSONArray? = null
-        var rawAlbumList:MutableList<RawAlbum>? = mutableListOf()
-        Thread({
-            jsonArray = JSONArray(getJsonFromURL(PHOTOS_URL))
-            rawAlbumList = getRawAlbumsFromURL(10)
-        }).start()
         val text = findViewById<TextInputEditText>(R.id.et_search)
         text.addTextChangedListener(object : TextWatcher {
 
-            override fun afterTextChanged(s: Editable) {}
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
-            override fun beforeTextChanged(s: CharSequence, start: Int,
-                                           count: Int, after: Int) {
+            }
+
+            override fun afterTextChanged(p0: Editable?) {
+
             }
 
             override fun onTextChanged(s: CharSequence, start: Int,
                                        before: Int, count: Int) {
                 Toast.makeText(this@SplashActivity, text.text, Toast.LENGTH_SHORT).show()
-                println(extractRawPhotosFromJSONArray(jsonArray))
-                println(extractRawPhotosFromJSONArray(jsonArray).size)
+                println(rawPhotosList)
+                println(rawPhotosList?.size)
             }
         })
     }
@@ -60,35 +68,39 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
             .show()
     }
 
-    fun getJsonFromURL(wantedURL: String) : String {
-        return URL(wantedURL).readText()
+
+    private fun loadJSONData(){
+            Thread {
+                try{
+                    rawPhotosList = extractRawPhotosFromJSONArray(JSONArray(getJsonFromURL(PHOTOS_URL)))
+                    rawAlbumList = getRawAlbumsFromURL(10)
+                    rawUsersList = getRawUsersFromURL(10)
+                }catch(e:IOException){
+                    println(e.message)
+                    runOnUiThread { showError(e.message) }
+                }
+            }.start()
     }
 
-    fun extractRawPhotosFromJSONArray(jsonArray:JSONArray?):MutableList<RawPhoto>{
-        val rawPhotoList = mutableListOf<RawPhoto>()
-        for(i in 0 until jsonArray!!.length()){
-            rawPhotoList.add(RawPhoto(jsonArray.getJSONObject(i).getInt("id"),
-                jsonArray.getJSONObject(i).getInt("albumId"),
-                jsonArray.getJSONObject(i).getString("title"),
-                jsonArray.getJSONObject(i).getString("url"),
-                jsonArray.getJSONObject(i).getString("thumbnailUrl")))
+    var loadJSONRunnable = Runnable()
+    {
+        run(){
+            loadJSONData()
         }
-
-        return rawPhotoList
     }
 
-    fun getRawAlbumsFromURL(size:Int):MutableList<RawAlbum>{
-        val rawAlbumsList = mutableListOf<RawAlbum>()
-        for(i in 1..size){
-            val URL:String = "https://jsonplaceholder.typicode.com/albums/$i"
-            rawAlbumsList.add(RawAlbum(JSONObject(getJsonFromURL(URL)).getInt("id"),
-                JSONObject(getJsonFromURL(URL)).getInt("userId"),
-                JSONObject(getJsonFromURL(URL)).getString("title")))
+    fun loadJSONDataUsingExecutors(){
+        try{
+            executorService.execute(loadJSONRunnable)
+            if (!executorService.awaitTermination(100, TimeUnit.MILLISECONDS)) {
+                Toast.makeText(this@SplashActivity, "Loading data...", Toast.LENGTH_SHORT).show()
+            }
+        }catch(e:ExecutionException){
+            println(e.message)
+            showError(e.message)
+        }finally{
+            executorService.shutdown()
         }
-
-        return rawAlbumsList
     }
-
-
 
 }
