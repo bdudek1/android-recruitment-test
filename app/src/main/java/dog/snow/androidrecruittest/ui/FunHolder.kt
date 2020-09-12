@@ -1,8 +1,13 @@
 package dog.snow.androidrecruittest.ui
 
+import dog.snow.androidrecruittest.SplashActivity
+import dog.snow.androidrecruittest.SplashActivity.Companion.albumIdLimit
+import dog.snow.androidrecruittest.SplashActivity.Companion.userIdLimit
 import dog.snow.androidrecruittest.repository.model.RawAlbum
 import dog.snow.androidrecruittest.repository.model.RawPhoto
 import dog.snow.androidrecruittest.repository.model.RawUser
+import dog.snow.androidrecruittest.ui.model.Detail
+import dog.snow.androidrecruittest.ui.model.ListItem
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URL
@@ -75,9 +80,42 @@ class FunHolder{
                         JSONObject(getJsonFromURL(URL)).getInt("userId"),
                         JSONObject(getJsonFromURL(URL)).getString("title"))
                 )
+                if(userIdLimit < JSONObject(getJsonFromURL(URL)).getInt("userId"))
+                    userIdLimit = JSONObject(getJsonFromURL(URL)).getInt("userId")
             }
 
             return rawAlbumsList
+        }
+
+        fun initItemsList(photos:MutableList<RawPhoto>,
+                          albums:MutableList<RawAlbum>):MutableList<ListItem>{
+            val itemsList:MutableList<ListItem> = mutableListOf()
+            for(photo in photos){
+                val albumTitle:String = albums.filter{a -> a.id.equals(photo.albumId)}.first().title
+                itemsList.add(ListItem(photo.id, photo.title,
+                albumTitle, photo.thumbnailUrl))
+            }
+
+            return itemsList
+        }
+
+        fun initDetailsList(photos:MutableList<RawPhoto>,
+                            albums:MutableList<RawAlbum>,
+                            users:MutableList<RawUser>):MutableList<Detail>{
+            val detailsList:MutableList<Detail> = mutableListOf()
+            for(photo in photos){
+                val albumTitle:String = albums.filter{a -> a.id.equals(photo.albumId)}.first().title
+                val userId:Int = albums.filter{a -> a.id.equals(photo.albumId)}.first().userId
+                val user:RawUser = users.filter {u -> u.id.equals(userId)}.first()
+                val username:String = user.username
+                val email:String = user.email
+                val phone:String = user.phone
+                val url: String = user.website
+
+                detailsList.add(Detail(photo.id, photo.title, albumTitle, username, email, phone, url))
+            }
+
+            return detailsList
         }
 
         fun extractRawPhotosFromJSONArray(jsonArray: JSONArray?):MutableList<RawPhoto>{
@@ -90,6 +128,8 @@ class FunHolder{
                         jsonArray.getJSONObject(i).getString("url"),
                         jsonArray.getJSONObject(i).getString("thumbnailUrl"))
                 )
+                if(albumIdLimit < jsonArray.getJSONObject(i).getInt("albumId"))
+                    albumIdLimit = jsonArray.getJSONObject(i).getInt("albumId")
             }
 
             return rawPhotoList
