@@ -41,15 +41,15 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
     private var rawAlbumList:MutableList<RawAlbum>? = mutableListOf()
     private var rawUsersList:MutableList<RawUser>? = mutableListOf()
 
-    private var itemsList:MutableList<ListItem>? = mutableListOf()
-    private var detailsList:MutableList<Detail>? = mutableListOf()
 
-    private lateinit var viewAdapter: dog.snow.androidrecruittest.ui.adapter.ListAdapter
-    private lateinit var viewManager: androidx.recyclerview.widget.LinearLayoutManager
+    //private lateinit var viewAdapter: dog.snow.androidrecruittest.ui.adapter.ListAdapter
+    //private lateinit var viewManager: androidx.recyclerview.widget.LinearLayoutManager
 
     companion object{
-        public var albumIdLimit:Int = 0
-        public var userIdLimit:Int = 0
+        var albumIdLimit:Int = 0
+        var userIdLimit:Int = 0
+        var itemsList:MutableList<ListItem>? = mutableListOf()
+        var detailsList:MutableList<Detail>? = mutableListOf()
     }
 
 
@@ -57,44 +57,44 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.splash_activity)
-        loadJSONDataUsingExecutors()
-        setContentView(R.layout.list_fragment)
-        viewManager = LinearLayoutManager(this)
-        viewAdapter = dog.snow.androidrecruittest.ui.adapter.ListAdapter{
-                item: ListItem, position: Int, view: View -> println("clicked $position")
-        }
+        loadJSONDataUsingExecutorsService()
+        supportFragmentManager.beginTransaction().replace(R.id.fragment_place, ListFragment.newInstance(), ListFragment.TAG).commit();
+//        viewManager = LinearLayoutManager(this)
+//        viewAdapter = dog.snow.androidrecruittest.ui.adapter.ListAdapter{
+//                item: ListItem, position: Int, view: View -> println("clicked $position")
+//        }
+//
+//        viewAdapter.submitList(itemsList)
+//        viewAdapter.notifyDataSetChanged()
 
-        viewAdapter.submitList(itemsList)
-        viewAdapter.notifyDataSetChanged()
-
-        val searchText = findViewById<TextInputEditText>(R.id.et_search)
-        var photosView = findViewById<RecyclerView>(R.id.rv_items).apply{
-            layoutManager = viewManager
-            adapter = viewAdapter
-        }
-
-
+//        val searchText = findViewById<TextInputEditText>(R.id.et_search)
+//        var photosView = findViewById<RecyclerView>(R.id.rv_items).apply{
+//            layoutManager = viewManager
+//            adapter = viewAdapter
+//        }
 
 
-        searchText.addTextChangedListener(object : TextWatcher {
 
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
-            }
-
-            override fun afterTextChanged(p0: Editable?) {
-
-            }
-
-            override fun onTextChanged(s: CharSequence, start: Int,
-                                       before: Int, count: Int) {
-                Toast.makeText(this@SplashActivity, searchText.text, Toast.LENGTH_SHORT).show()
-                viewAdapter.submitList(itemsList)
-                viewAdapter.notifyDataSetChanged()
-                println(viewAdapter.currentList)
-                println(viewAdapter.currentList.size)
-            }
-        })
+//        searchText.addTextChangedListener(object : TextWatcher {
+//
+//            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+//
+//            }
+//
+//            override fun afterTextChanged(p0: Editable?) {
+//
+//            }
+//
+//            override fun onTextChanged(s: CharSequence, start: Int,
+//                                       before: Int, count: Int) {
+//                Toast.makeText(this@SplashActivity, searchText.text, Toast.LENGTH_SHORT).show()
+//                viewAdapter.submitList(itemsList)
+//                viewAdapter.notifyDataSetChanged()
+//                println(viewAdapter.currentList)
+//                println(viewAdapter.currentList.size)
+//            }
+//        })
     }
 
     private fun showError(errorMessage: String?) {
@@ -131,7 +131,7 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
         }
     }
 
-    fun loadJSONDataUsingExecutors(){
+    fun loadJSONDataUsingExecutorsService(){
         try{
             executorService.execute(loadJSONRunnable)
             if (!executorService.awaitTermination(100, TimeUnit.MILLISECONDS)) {
