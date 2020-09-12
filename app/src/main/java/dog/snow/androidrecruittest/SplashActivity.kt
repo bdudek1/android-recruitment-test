@@ -46,10 +46,34 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
     //private lateinit var viewManager: androidx.recyclerview.widget.LinearLayoutManager
 
     companion object{
-        var albumIdLimit:Int = 0
-        var userIdLimit:Int = 0
-        var itemsList:MutableList<ListItem>? = mutableListOf()
-        var detailsList:MutableList<Detail>? = mutableListOf()
+        private var albumIdLimit:Int = 0
+        private var userIdLimit:Int = 0
+        private var itemsList:MutableList<ListItem>? = mutableListOf()
+        private var detailsList:MutableList<Detail>? = mutableListOf()
+
+        fun getAlbumIdLimit():Int{
+            return albumIdLimit
+        }
+
+        fun getUserIdLimit():Int{
+            return userIdLimit
+        }
+
+        fun setAlbumIdLimit(limit:Int){
+            albumIdLimit = limit
+        }
+
+        fun setUserIdLimit(limit:Int){
+            userIdLimit = limit
+        }
+
+        fun getItemList():MutableList<ListItem>?{
+            return itemsList
+        }
+
+        fun getDetailList():MutableList<Detail>?{
+            return detailsList
+        }
     }
 
 

@@ -51,7 +51,7 @@ class ListFragment : Fragment(R.layout.list_fragment){
         photosView.adapter = viewAdapter
         photosView.itemAnimator = DefaultItemAnimator()
         photosView.setHasFixedSize(false)
-        viewAdapter.submitList(SplashActivity.itemsList)
+        viewAdapter.submitList(SplashActivity.getItemList())
         searchText.addTextChangedListener(object : TextWatcher {
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -67,7 +67,7 @@ class ListFragment : Fragment(R.layout.list_fragment){
                 //if(SplashActivity.itemsList!!.size > 0)
                 //SplashActivity.itemsList?.removeAt(1);
                //viewAdapter.submitList(null)
-                viewAdapter.submitList(SplashActivity.itemsList)
+                viewAdapter.submitList(SplashActivity.getItemList())
                 println(viewAdapter.currentList)
                 println(viewAdapter.currentList.size)
             }

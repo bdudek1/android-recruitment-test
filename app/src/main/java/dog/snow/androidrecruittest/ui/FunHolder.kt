@@ -1,8 +1,6 @@
 package dog.snow.androidrecruittest.ui
 
 import dog.snow.androidrecruittest.SplashActivity
-import dog.snow.androidrecruittest.SplashActivity.Companion.albumIdLimit
-import dog.snow.androidrecruittest.SplashActivity.Companion.userIdLimit
 import dog.snow.androidrecruittest.repository.model.RawAlbum
 import dog.snow.androidrecruittest.repository.model.RawPhoto
 import dog.snow.androidrecruittest.repository.model.RawUser
@@ -80,8 +78,8 @@ class FunHolder{
                         JSONObject(getJsonFromURL(URL)).getInt("userId"),
                         JSONObject(getJsonFromURL(URL)).getString("title"))
                 )
-                if(userIdLimit < JSONObject(getJsonFromURL(URL)).getInt("userId"))
-                    userIdLimit = JSONObject(getJsonFromURL(URL)).getInt("userId")
+                if(SplashActivity.getUserIdLimit() < JSONObject(getJsonFromURL(URL)).getInt("userId"))
+                    SplashActivity.setUserIdLimit(JSONObject(getJsonFromURL(URL)).getInt("userId"))
             }
 
             return rawAlbumsList
@@ -128,8 +126,8 @@ class FunHolder{
                         jsonArray.getJSONObject(i).getString("url"),
                         jsonArray.getJSONObject(i).getString("thumbnailUrl"))
                 )
-                if(albumIdLimit < jsonArray.getJSONObject(i).getInt("albumId"))
-                    albumIdLimit = jsonArray.getJSONObject(i).getInt("albumId")
+                if(SplashActivity.getAlbumIdLimit() < jsonArray.getJSONObject(i).getInt("albumId"))
+                    SplashActivity.setAlbumIdLimit(jsonArray.getJSONObject(i).getInt("albumId"))
             }
 
             return rawPhotoList
