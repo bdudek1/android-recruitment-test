@@ -10,7 +10,9 @@
 
     <include
         android:id="@+id/toolbar"
-        layout="@layout/layout_appbar" />
+        layout="@layout/layout_appbar"
+        android:visibility="visible"
+        tools:visibility="visible" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/container"

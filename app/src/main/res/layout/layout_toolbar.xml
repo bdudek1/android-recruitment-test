@@ -5,6 +5,19 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
+    android:background="@color/sd_color_white_mask"
     android:fitsSystemWindows="true"
     app:layout_scrollFlags="scroll|enterAlwaysCollapsed"
-    app:logo="@drawable/ic_logo_appbar" />
+    app:logo="@drawable/ic_logo_appbar" >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Android Recruit Test"
+        android:textSize="24sp"
+        android:textColor="@color/sd_color_black"
+        android:textStyle="bold"
+        android:layout_gravity="center"
+        android:id="@+id/toolbar_title" />
+
+    </com.google.android.material.appbar.MaterialToolbar>

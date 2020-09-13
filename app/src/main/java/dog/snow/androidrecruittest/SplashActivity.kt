@@ -2,20 +2,17 @@ package dog.snow.androidrecruittest
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentTransaction
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.squareup.picasso.Picasso
-import com.squareup.picasso.Picasso.LoadedFrom
 import dog.snow.androidrecruittest.repository.model.RawAlbum
 import dog.snow.androidrecruittest.repository.model.RawPhoto
 import dog.snow.androidrecruittest.repository.model.RawUser
 import dog.snow.androidrecruittest.ui.FunHolder.Companion.extractBitmapsFromRawPhotos
 import dog.snow.androidrecruittest.ui.FunHolder.Companion.extractRawPhotosFromJSONArray
-import dog.snow.androidrecruittest.ui.FunHolder.Companion.extractThumbnailBitmapsFromRawPhotos
 import dog.snow.androidrecruittest.ui.FunHolder.Companion.getJsonFromURL
 import dog.snow.androidrecruittest.ui.FunHolder.Companion.getRawAlbumsFromURL
 import dog.snow.androidrecruittest.ui.FunHolder.Companion.getRawUsersFromURL
@@ -92,12 +89,11 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.splash_activity)
         loadJSONDataUsingExecutorsService()
-        while(detailsList?.size!! < LIMIT_OF_PHOTOS){
+        //thumbnailBitmapList.size
+        while(thumbnailBitmapList?.size!! < LIMIT_OF_PHOTOS){
             Thread.sleep(50)
         }
         setContentView(R.layout.main_activity)
-        //thumbnailBitmapList = extractThumbnailBitmapsFromRawPhotos(rawPhotosList!!)
-        //bitmapList = extractBitmapsFromRawPhotos(rawPhotosList!!)
         supportFragmentManager.beginTransaction()
                               .replace(R.id.container, ListFragment.newInstance(), ListFragment.TAG)
                               .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
@@ -124,8 +120,8 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
                     rawUsersList = getRawUsersFromURL(userIdLimit)
                     itemsList = initItemsList(rawPhotosList!!, rawAlbumList!!)
                     detailsList = initDetailsList(rawPhotosList!!, rawAlbumList!!, rawUsersList!!)
-                    thumbnailBitmapList = extractThumbnailBitmapsFromRawPhotos(rawPhotosList!!)
-                    bitmapList = extractBitmapsFromRawPhotos(rawPhotosList!!)
+                    bitmapList = extractBitmapsFromRawPhotos(rawPhotosList!!, false)
+                    thumbnailBitmapList = extractBitmapsFromRawPhotos(rawPhotosList!!, true)
                 }catch(e:IOException){
                     println(e.message)
                     runOnUiThread { showError(e.message) }

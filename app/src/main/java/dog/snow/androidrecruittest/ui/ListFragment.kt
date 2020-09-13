@@ -1,6 +1,7 @@
 package dog.snow.androidrecruittest.ui
 
 import android.annotation.SuppressLint
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -8,19 +9,18 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
 import dog.snow.androidrecruittest.R
-import dog.snow.androidrecruittest.SplashActivity.Companion.getBitmapList
 import dog.snow.androidrecruittest.SplashActivity.Companion.getItemList
-import dog.snow.androidrecruittest.SplashActivity.Companion.getThumbnailBitmapList
 import dog.snow.androidrecruittest.ui.model.ListItem
 
 class ListFragment : Fragment(R.layout.list_fragment){
@@ -46,7 +46,7 @@ class ListFragment : Fragment(R.layout.list_fragment){
         super.onCreate(savedInstanceState)
     }
 
-    @SuppressLint("ResourceType")
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         rootView = inflater.inflate(R.layout.list_fragment, container, false)
         viewManager = LinearLayoutManager(this.context)
@@ -66,6 +66,9 @@ class ListFragment : Fragment(R.layout.list_fragment){
         photosView.layoutManager = LinearLayoutManager(activity)
         photosView.adapter = viewAdapter
         photosView.itemAnimator = DefaultItemAnimator()
+        val itemDecorator:DividerItemDecoration = DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL)
+        itemDecorator.setDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.divider)!!)
+        photosView.addItemDecoration(itemDecorator)
         photosView.setHasFixedSize(false)
         viewAdapter.submitList(getItemList())
         searchText.addTextChangedListener(object : TextWatcher {
@@ -86,14 +89,9 @@ class ListFragment : Fragment(R.layout.list_fragment){
             override fun onTextChanged(s: CharSequence, start: Int,
                                        before: Int, count: Int) {
                 val filterText:String = searchText.text.toString()
-
                 viewAdapter.submitList(getItemList()?.filter{
                                     a -> a.albumTitle.contains(filterText) ||
                                          a.title.contains(filterText)})
-
-                println(getBitmapList()?.size)
-                println(getThumbnailBitmapList()?.size)
-
             }
         })
         return rootView

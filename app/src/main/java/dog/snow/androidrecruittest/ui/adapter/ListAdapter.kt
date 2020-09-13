@@ -39,13 +39,13 @@ class ListAdapter(private val onClick: (item: ListItem, position: Int, view: Vie
             val tvAlbumTitle: TextView = findViewById(R.id.tv_album_title)
             tvTitle.text = item.title
             tvAlbumTitle.text = item.albumTitle
-            val index:Int = getRawPhotosList()?.filter{a -> a.title.equals(item.title)}?.first()!!.id-1
-                try{
-                    ivThumb.setImageBitmap(getThumbnailBitmapList()?.get(index))
-                }catch(e:IndexOutOfBoundsException){
-                    println(e.message)
-                    println("INDEX OUT OF BOUNDS")
-                }
+            ivThumb.setImageDrawable(getResources().getDrawable(R.drawable.ic_placeholder))
+            val index:Int = getRawPhotosList()?.filter{a->a.title.equals(item.title)}?.first()!!.id-1
+            try{
+                ivThumb.setImageBitmap(getThumbnailBitmapList()?.get(index))
+            }catch(e:IndexOutOfBoundsException){
+                println(e.message)
+            }
 
                 setOnClickListener { onClick(item, adapterPosition, this) }
         }

@@ -97,7 +97,7 @@ class FunHolder{
                           albums:MutableList<RawAlbum>):MutableList<ListItem>{
             val itemsList:MutableList<ListItem> = mutableListOf()
             for(photo in photos){
-                val albumTitle:String = albums.filter{a -> a.id.equals(photo.albumId)}.first().title
+                val albumTitle:String = albums.filter{a -> a.id.equals(photo.albumId)}.single().title
                 itemsList.add(ListItem(photo.id, photo.title,
                 albumTitle, photo.thumbnailUrl))
             }
@@ -110,9 +110,9 @@ class FunHolder{
                             users:MutableList<RawUser>):MutableList<Detail>{
             val detailsList:MutableList<Detail> = mutableListOf()
             for(photo in photos){
-                val albumTitle:String = albums.filter{a -> a.id.equals(photo.albumId)}.first().title
-                val userId:Int = albums.filter{a -> a.id.equals(photo.albumId)}.first().userId
-                val user:RawUser = users.filter {u -> u.id.equals(userId)}.first()
+                val albumTitle:String = albums.filter{a -> a.id.equals(photo.albumId)}.single().title
+                val userId:Int = albums.filter{a -> a.id.equals(photo.albumId)}.single().userId
+                val user:RawUser = users.filter {u -> u.id.equals(userId)}.single()
                 val username:String = user.username
                 val email:String = user.email
                 val phone:String = user.phone
@@ -141,59 +141,25 @@ class FunHolder{
             return rawPhotoList
         }
 
-        fun extractThumbnailBitmapsFromRawPhotos(rawPhotos:MutableList<RawPhoto>):MutableList<Bitmap>{
+        fun extractBitmapsFromRawPhotos(rawPhotos:MutableList<RawPhoto>, ifThumbnail:Boolean):MutableList<Bitmap>{
             val bitmapList:MutableList<Bitmap> = mutableListOf()
             for(photo in rawPhotos){
+                var url:URL
+                if(ifThumbnail) url = URL(photo.thumbnailUrl) else url = URL(photo.url)
                 try {
-                    val url = URL(photo.thumbnailUrl)
-                    val connection =
-                        url.openConnection() as HttpsURLConnection
+                    val connection = url.openConnection() as HttpsURLConnection
                     connection.doInput = true
-                    connection.setRequestProperty("User-Agent","Cool app")
+                    connection.setRequestProperty("User-Agent","Test-app")
                     connection.connect()
                     val input = connection.inputStream
                     val myBitmap = BitmapFactory.decodeStream(input)
                     bitmapList.add(myBitmap!!)
+                    connection.disconnect()
                 } catch (e: Exception) {
-                    //Log.e("Error", e.message)
                     e.printStackTrace()
                 }
             }
             return bitmapList
         }
-
-        fun extractBitmapsFromRawPhotos(rawPhotos:MutableList<RawPhoto>):MutableList<Bitmap>{
-            val bitmapList:MutableList<Bitmap> = mutableListOf()
-            for(photo in rawPhotos){
-                val url = URL(photo.url)
-                try {
-                    val myBitmap = getBitmap(photo.url)
-                    bitmapList.add(myBitmap!!)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-
-            }
-
-            return bitmapList
-        }
-
-        fun getBitmap(url : String?) : Bitmap? {
-            var bmp : Bitmap ? = null
-            Picasso.get().load(url).into(object : com.squareup.picasso.Target {
-                override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
-                    println("SUCCEED")
-                    bmp =  bitmap
-                }
-
-                override fun onPrepareLoad(placeHolderDrawable: Drawable?) {}
-
-                override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
-                    println("FAILED")
-                }
-            })
-            return bmp
-        }
-
     }
 }

@@ -1,13 +1,15 @@
 package dog.snow.androidrecruittest
 
-import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.ActionBar
+import android.view.Gravity
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.appbar.MaterialToolbar
 
 class MainActivity : AppCompatActivity(R.layout.main_activity){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setSupportActionBar(findViewById(R.id.toolbar))
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbarText = toolbar.findViewById<MaterialToolbar>(R.id.toolbar_title)
+        setSupportActionBar(toolbar)
     }
 }
