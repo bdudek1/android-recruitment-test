@@ -1,5 +1,6 @@
 package dog.snow.androidrecruittest.ui
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -7,6 +8,8 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
@@ -15,12 +18,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
 import dog.snow.androidrecruittest.R
-import dog.snow.androidrecruittest.SplashActivity
 import dog.snow.androidrecruittest.SplashActivity.Companion.getBitmapList
 import dog.snow.androidrecruittest.SplashActivity.Companion.getItemList
 import dog.snow.androidrecruittest.SplashActivity.Companion.getThumbnailBitmapList
 import dog.snow.androidrecruittest.ui.model.ListItem
-import java.lang.NullPointerException
 
 class ListFragment : Fragment(R.layout.list_fragment){
     private lateinit var rootView: View
@@ -45,18 +46,23 @@ class ListFragment : Fragment(R.layout.list_fragment){
         super.onCreate(savedInstanceState)
     }
 
+    @SuppressLint("ResourceType")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         rootView = inflater.inflate(R.layout.list_fragment, container, false)
         viewManager = LinearLayoutManager(this.context)
         viewAdapter = dog.snow.androidrecruittest.ui.adapter.ListAdapter{
                 item: ListItem, position: Int, view: View ->
             DetailsFragment.setSelectedItem(item)
-            fragmentManager?.beginTransaction()?.replace(R.id.fragment_place, DetailsFragment.newInstance(), DetailsFragment.TAG)?.setTransition(
-                FragmentTransaction.TRANSIT_FRAGMENT_FADE)?.commit()
+            fragmentManager?.beginTransaction()
+                           ?.replace(R.id.container, DetailsFragment.newInstance(), DetailsFragment.TAG)
+                           ?.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                           ?.addToBackStack(null)?.commit()
 
         }
+        val emptyString = rootView.findViewById<TextView>(R.id.tv_empty)
         val searchText = rootView.findViewById<TextInputEditText>(R.id.et_search)
         val photosView = rootView.findViewById<RecyclerView>(R.id.rv_items)
+        emptyString.visibility = View.GONE
         photosView.layoutManager = LinearLayoutManager(activity)
         photosView.adapter = viewAdapter
         photosView.itemAnimator = DefaultItemAnimator()
@@ -69,10 +75,10 @@ class ListFragment : Fragment(R.layout.list_fragment){
             }
 
             override fun afterTextChanged(p0: Editable?) {
-                try{
-                    viewManager.smoothScrollToPosition(photosView, null, 0)
-                }catch(e:NullPointerException){
-                    println(e.message)
+                if(viewAdapter.currentList.size == 0){
+                    emptyString.visibility = View.VISIBLE
+                }else{
+                    emptyString.visibility = View.GONE
                 }
             }
 

@@ -1,7 +1,10 @@
 package dog.snow.androidrecruittest.ui
 
+import android.R.attr.src
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
+import com.squareup.picasso.Picasso
 import dog.snow.androidrecruittest.SplashActivity
 import dog.snow.androidrecruittest.repository.model.RawAlbum
 import dog.snow.androidrecruittest.repository.model.RawPhoto
@@ -10,10 +13,10 @@ import dog.snow.androidrecruittest.ui.model.Detail
 import dog.snow.androidrecruittest.ui.model.ListItem
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.IOException
-import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import javax.net.ssl.HttpsURLConnection
+
 
 class FunHolder{
     companion object{
@@ -141,21 +144,21 @@ class FunHolder{
         fun extractThumbnailBitmapsFromRawPhotos(rawPhotos:MutableList<RawPhoto>):MutableList<Bitmap>{
             val bitmapList:MutableList<Bitmap> = mutableListOf()
             for(photo in rawPhotos){
-                val url = URL(photo.thumbnailUrl)
-                try{
-                    val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
-                    connection.setDoInput(true)
+                try {
+                    val url = URL(photo.thumbnailUrl)
+                    val connection =
+                        url.openConnection() as HttpsURLConnection
+                    connection.doInput = true
+                    connection.setRequestProperty("User-Agent","Cool app")
                     connection.connect()
-                    val input: InputStream = connection.inputStream
+                    val input = connection.inputStream
                     val myBitmap = BitmapFactory.decodeStream(input)
-                    bitmapList.add(myBitmap)
-                    println("SUCCESS")
-                }catch(e:IOException){
-                    println(e.message)
-                    println("FAILURE")
+                    bitmapList.add(myBitmap!!)
+                } catch (e: Exception) {
+                    //Log.e("Error", e.message)
+                    e.printStackTrace()
                 }
             }
-
             return bitmapList
         }
 
@@ -163,22 +166,34 @@ class FunHolder{
             val bitmapList:MutableList<Bitmap> = mutableListOf()
             for(photo in rawPhotos){
                 val url = URL(photo.url)
-                try{
-                    val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
-                    connection.setDoInput(true)
-                    connection.connect()
-                    val input: InputStream = connection.inputStream
-                    val myBitmap = BitmapFactory.decodeStream(input)
-                    bitmapList.add(myBitmap)
-                    println("SUCCESS")
-                }catch(e:IOException){
-                    println(e.message)
-                    println("FAILURE")
+                try {
+                    val myBitmap = getBitmap(photo.url)
+                    bitmapList.add(myBitmap!!)
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
 
             }
 
             return bitmapList
         }
+
+        fun getBitmap(url : String?) : Bitmap? {
+            var bmp : Bitmap ? = null
+            Picasso.get().load(url).into(object : com.squareup.picasso.Target {
+                override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
+                    println("SUCCEED")
+                    bmp =  bitmap
+                }
+
+                override fun onPrepareLoad(placeHolderDrawable: Drawable?) {}
+
+                override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
+                    println("FAILED")
+                }
+            })
+            return bmp
+        }
+
     }
 }

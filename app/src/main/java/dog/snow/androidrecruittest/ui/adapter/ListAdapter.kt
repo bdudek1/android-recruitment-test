@@ -1,9 +1,7 @@
 package dog.snow.androidrecruittest.ui.adapter
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
-import android.provider.MediaStore
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,14 +9,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Picasso
+import com.squareup.picasso.Picasso.LoadedFrom
 import dog.snow.androidrecruittest.R
-import dog.snow.androidrecruittest.SplashActivity
 import dog.snow.androidrecruittest.SplashActivity.Companion.getRawPhotosList
 import dog.snow.androidrecruittest.SplashActivity.Companion.getThumbnailBitmapList
 import dog.snow.androidrecruittest.ui.model.ListItem
-import java.io.IOException
-import java.lang.IndexOutOfBoundsException
-import java.net.URL
 
 
 class ListAdapter(private val onClick: (item: ListItem, position: Int, view: View) -> Unit) :
@@ -48,6 +44,7 @@ class ListAdapter(private val onClick: (item: ListItem, position: Int, view: Vie
                     ivThumb.setImageBitmap(getThumbnailBitmapList()?.get(index))
                 }catch(e:IndexOutOfBoundsException){
                     println(e.message)
+                    println("INDEX OUT OF BOUNDS")
                 }
 
                 setOnClickListener { onClick(item, adapterPosition, this) }
