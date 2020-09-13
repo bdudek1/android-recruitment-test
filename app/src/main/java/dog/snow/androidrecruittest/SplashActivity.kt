@@ -1,21 +1,18 @@
 package dog.snow.androidrecruittest
 
 import android.annotation.SuppressLint
-import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.fragment.app.FragmentTransaction
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.textfield.TextInputEditText
 import dog.snow.androidrecruittest.repository.model.RawAlbum
 import dog.snow.androidrecruittest.repository.model.RawPhoto
 import dog.snow.androidrecruittest.repository.model.RawUser
+import dog.snow.androidrecruittest.ui.FunHolder.Companion.extractBitmapsFromRawPhotos
 import dog.snow.androidrecruittest.ui.FunHolder.Companion.extractRawPhotosFromJSONArray
+import dog.snow.androidrecruittest.ui.FunHolder.Companion.extractThumbnailBitmapsFromRawPhotos
 import dog.snow.androidrecruittest.ui.FunHolder.Companion.getJsonFromURL
 import dog.snow.androidrecruittest.ui.FunHolder.Companion.getRawAlbumsFromURL
 import dog.snow.androidrecruittest.ui.FunHolder.Companion.getRawUsersFromURL
@@ -37,10 +34,6 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
     private val PHOTOS_URL:String = "https://jsonplaceholder.typicode.com/photos?_limit=$LIMIT_OF_PHOTOS"
     private val executorService:ExecutorService = Executors.newSingleThreadExecutor()
 
-    private var rawPhotosList:MutableList<RawPhoto>? = mutableListOf()
-    private var rawAlbumList:MutableList<RawAlbum>? = mutableListOf()
-    private var rawUsersList:MutableList<RawUser>? = mutableListOf()
-
 
     //private lateinit var viewAdapter: dog.snow.androidrecruittest.ui.adapter.ListAdapter
     //private lateinit var viewManager: androidx.recyclerview.widget.LinearLayoutManager
@@ -50,6 +43,11 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
         private var userIdLimit:Int = 0
         private var itemsList:MutableList<ListItem>? = mutableListOf()
         private var detailsList:MutableList<Detail>? = mutableListOf()
+        private var bitmapList:MutableList<Bitmap>? = mutableListOf()
+        private var thumbnailBitmapList:MutableList<Bitmap>? = mutableListOf()
+        private var rawPhotosList:MutableList<RawPhoto>? = mutableListOf()
+        private var rawAlbumList:MutableList<RawAlbum>? = mutableListOf()
+        private var rawUsersList:MutableList<RawUser>? = mutableListOf()
 
         fun getAlbumIdLimit():Int{
             return albumIdLimit
@@ -74,6 +72,18 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
         fun getDetailList():MutableList<Detail>?{
             return detailsList
         }
+
+        fun getBitmapList():MutableList<Bitmap>?{
+            return bitmapList
+        }
+
+        fun getThumbnailBitmapList():MutableList<Bitmap>?{
+            return thumbnailBitmapList
+        }
+
+        fun getRawPhotosList():MutableList<RawPhoto>?{
+            return rawPhotosList
+        }
     }
 
 
@@ -82,43 +92,8 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.splash_activity)
         loadJSONDataUsingExecutorsService()
-        supportFragmentManager.beginTransaction().replace(R.id.fragment_place, ListFragment.newInstance(), ListFragment.TAG).commit();
-//        viewManager = LinearLayoutManager(this)
-//        viewAdapter = dog.snow.androidrecruittest.ui.adapter.ListAdapter{
-//                item: ListItem, position: Int, view: View -> println("clicked $position")
-//        }
-//
-//        viewAdapter.submitList(itemsList)
-//        viewAdapter.notifyDataSetChanged()
-
-//        val searchText = findViewById<TextInputEditText>(R.id.et_search)
-//        var photosView = findViewById<RecyclerView>(R.id.rv_items).apply{
-//            layoutManager = viewManager
-//            adapter = viewAdapter
-//        }
-
-
-
-
-//        searchText.addTextChangedListener(object : TextWatcher {
-//
-//            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-//
-//            }
-//
-//            override fun afterTextChanged(p0: Editable?) {
-//
-//            }
-//
-//            override fun onTextChanged(s: CharSequence, start: Int,
-//                                       before: Int, count: Int) {
-//                Toast.makeText(this@SplashActivity, searchText.text, Toast.LENGTH_SHORT).show()
-//                viewAdapter.submitList(itemsList)
-//                viewAdapter.notifyDataSetChanged()
-//                println(viewAdapter.currentList)
-//                println(viewAdapter.currentList.size)
-//            }
-//        })
+        supportFragmentManager.beginTransaction().replace(R.id.fragment_place, ListFragment.newInstance(), ListFragment.TAG).setTransition(
+            FragmentTransaction.TRANSIT_ENTER_MASK).commit()
     }
 
     private fun showError(errorMessage: String?) {
@@ -141,6 +116,8 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
                     rawUsersList = getRawUsersFromURL(userIdLimit)
                     itemsList = initItemsList(rawPhotosList!!, rawAlbumList!!)
                     detailsList = initDetailsList(rawPhotosList!!, rawAlbumList!!, rawUsersList!!)
+                    bitmapList = extractBitmapsFromRawPhotos(rawPhotosList!!)
+                    thumbnailBitmapList = extractThumbnailBitmapsFromRawPhotos(rawPhotosList!!)
                 }catch(e:IOException){
                     println(e.message)
                     runOnUiThread { showError(e.message) }

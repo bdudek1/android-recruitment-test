@@ -1,20 +1,26 @@
 package dog.snow.androidrecruittest.ui
 
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
 import dog.snow.androidrecruittest.R
 import dog.snow.androidrecruittest.SplashActivity
+import dog.snow.androidrecruittest.SplashActivity.Companion.getBitmapList
+import dog.snow.androidrecruittest.SplashActivity.Companion.getItemList
+import dog.snow.androidrecruittest.SplashActivity.Companion.getThumbnailBitmapList
 import dog.snow.androidrecruittest.ui.model.ListItem
+import java.lang.NullPointerException
 
 class ListFragment : Fragment(R.layout.list_fragment){
     private lateinit var rootView: View
@@ -43,7 +49,11 @@ class ListFragment : Fragment(R.layout.list_fragment){
         rootView = inflater.inflate(R.layout.list_fragment, container, false)
         viewManager = LinearLayoutManager(this.context)
         viewAdapter = dog.snow.androidrecruittest.ui.adapter.ListAdapter{
-                item: ListItem, position: Int, view: View -> println("clicked $position")
+                item: ListItem, position: Int, view: View ->
+            DetailsFragment.setSelectedItem(item)
+            fragmentManager?.beginTransaction()?.replace(R.id.fragment_place, DetailsFragment.newInstance(), DetailsFragment.TAG)?.setTransition(
+                FragmentTransaction.TRANSIT_FRAGMENT_FADE)?.commit()
+
         }
         val searchText = rootView.findViewById<TextInputEditText>(R.id.et_search)
         val photosView = rootView.findViewById<RecyclerView>(R.id.rv_items)
@@ -51,7 +61,7 @@ class ListFragment : Fragment(R.layout.list_fragment){
         photosView.adapter = viewAdapter
         photosView.itemAnimator = DefaultItemAnimator()
         photosView.setHasFixedSize(false)
-        viewAdapter.submitList(SplashActivity.getItemList())
+        viewAdapter.submitList(getItemList())
         searchText.addTextChangedListener(object : TextWatcher {
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -59,17 +69,25 @@ class ListFragment : Fragment(R.layout.list_fragment){
             }
 
             override fun afterTextChanged(p0: Editable?) {
-
+                try{
+                    viewManager.smoothScrollToPosition(photosView, null, 0)
+                }catch(e:NullPointerException){
+                    println(e.message)
+                }
             }
 
+            @RequiresApi(Build.VERSION_CODES.N)
             override fun onTextChanged(s: CharSequence, start: Int,
                                        before: Int, count: Int) {
-                //if(SplashActivity.itemsList!!.size > 0)
-                //SplashActivity.itemsList?.removeAt(1);
-               //viewAdapter.submitList(null)
-                viewAdapter.submitList(SplashActivity.getItemList())
-                println(viewAdapter.currentList)
-                println(viewAdapter.currentList.size)
+                val filterText:String = searchText.text.toString()
+
+                viewAdapter.submitList(getItemList()?.filter{
+                                    a -> a.albumTitle.contains(filterText) ||
+                                         a.title.contains(filterText)})
+
+                println(getBitmapList()?.size)
+                println(getThumbnailBitmapList()?.size)
+
             }
         })
         return rootView

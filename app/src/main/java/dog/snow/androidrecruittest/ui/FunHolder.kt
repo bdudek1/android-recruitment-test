@@ -1,5 +1,7 @@
 package dog.snow.androidrecruittest.ui
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import dog.snow.androidrecruittest.SplashActivity
 import dog.snow.androidrecruittest.repository.model.RawAlbum
 import dog.snow.androidrecruittest.repository.model.RawPhoto
@@ -8,6 +10,9 @@ import dog.snow.androidrecruittest.ui.model.Detail
 import dog.snow.androidrecruittest.ui.model.ListItem
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.IOException
+import java.io.InputStream
+import java.net.HttpURLConnection
 import java.net.URL
 
 class FunHolder{
@@ -133,6 +138,47 @@ class FunHolder{
             return rawPhotoList
         }
 
-    }
+        fun extractThumbnailBitmapsFromRawPhotos(rawPhotos:MutableList<RawPhoto>):MutableList<Bitmap>{
+            val bitmapList:MutableList<Bitmap> = mutableListOf()
+            for(photo in rawPhotos){
+                val url = URL(photo.thumbnailUrl)
+                try{
+                    val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+                    connection.setDoInput(true)
+                    connection.connect()
+                    val input: InputStream = connection.inputStream
+                    val myBitmap = BitmapFactory.decodeStream(input)
+                    bitmapList.add(myBitmap)
+                    println("SUCCESS")
+                }catch(e:IOException){
+                    println(e.message)
+                    println("FAILURE")
+                }
+            }
 
+            return bitmapList
+        }
+
+        fun extractBitmapsFromRawPhotos(rawPhotos:MutableList<RawPhoto>):MutableList<Bitmap>{
+            val bitmapList:MutableList<Bitmap> = mutableListOf()
+            for(photo in rawPhotos){
+                val url = URL(photo.url)
+                try{
+                    val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+                    connection.setDoInput(true)
+                    connection.connect()
+                    val input: InputStream = connection.inputStream
+                    val myBitmap = BitmapFactory.decodeStream(input)
+                    bitmapList.add(myBitmap)
+                    println("SUCCESS")
+                }catch(e:IOException){
+                    println(e.message)
+                    println("FAILURE")
+                }
+
+            }
+
+            return bitmapList
+        }
+    }
 }
