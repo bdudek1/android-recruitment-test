@@ -1,8 +1,10 @@
 package dog.snow.androidrecruittest
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
@@ -33,6 +35,7 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
     private val executorService:ExecutorService = Executors.newSingleThreadExecutor()
 
     companion object{
+        private val LIMIT_OF_PHOTOS:Int = 100
         private var albumIdLimit:Int = 0
         private var userIdLimit:Int = 0
         private var itemsList:MutableList<ListItem>? = mutableListOf()
@@ -78,6 +81,11 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
         fun getRawPhotosList():MutableList<RawPhoto>?{
             return rawPhotosList
         }
+
+        fun getLimitOfPhotos():Int{
+            return LIMIT_OF_PHOTOS
+        }
+
     }
 
 
@@ -85,19 +93,14 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.splash_activity)
-        Handler().postDelayed({
-            startActivity(Intent(this,MainActivity::class.java))
-            overridePendingTransition( R.anim.fade_in, R.anim.fade_out );
-            finish()
-        }, SPLASH_SCREEN_MILIS)
-        loadJSONDataUsingExecutorsService()
+        tryToDownloadData(isNetworkAvailable(applicationContext))
     }
 
     private fun showError(errorMessage: String?) {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.cant_download_dialog_title)
             .setMessage(getString(R.string.cant_download_dialog_message, errorMessage))
-            .setPositiveButton(R.string.cant_download_dialog_btn_positive) { _, _ -> loadJSONDataUsingExecutorsService() }
+            .setPositiveButton(R.string.cant_download_dialog_btn_positive) { _, _ -> tryToDownloadData(isNetworkAvailable(applicationContext)) }
             .setNegativeButton(R.string.cant_download_dialog_btn_negative) { _, _ -> finish() }
             .create()
             .apply { setCanceledOnTouchOutside(false) }
@@ -117,7 +120,6 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
                     bitmapList = extractBitmapsFromRawPhotos(rawPhotosList!!, false)
                 }catch(e:IOException){
                     println(e.message)
-                    runOnUiThread { showError(e.message) }
                 }
             }.start()
     }
@@ -129,15 +131,34 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
         }
     }
 
-    fun loadJSONDataUsingExecutorsService(){
+    private fun loadJSONDataUsingExecutorsService(){
         try{
             executorService.execute(loadJSONRunnable)
         }catch(e:ExecutionException){
             println(e.message)
-            showError(e.message)
         }finally{
             executorService.shutdown()
         }
+    }
+
+    private fun tryToDownloadData(isUserConnected:Boolean){
+        if(isUserConnected){
+            Handler().postDelayed({
+                startActivity(Intent(this,MainActivity::class.java))
+                overridePendingTransition( R.anim.fade_in, R.anim.fade_out );
+                finish()
+            }, SPLASH_SCREEN_MILIS)
+            loadJSONDataUsingExecutorsService()
+        }else{
+            showError("No internet connection detected.")
+        }
+    }
+
+    private fun isNetworkAvailable(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        return connectivityManager.activeNetworkInfo != null && connectivityManager.activeNetworkInfo
+            .isConnected
     }
 
 }
