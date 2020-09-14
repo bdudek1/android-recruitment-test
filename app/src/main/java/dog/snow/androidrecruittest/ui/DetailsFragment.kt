@@ -1,18 +1,14 @@
 package dog.snow.androidrecruittest.ui
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.google.android.material.appbar.MaterialToolbar
 import dog.snow.androidrecruittest.R
-import dog.snow.androidrecruittest.SplashActivity
 import dog.snow.androidrecruittest.SplashActivity.Companion.getBitmapList
 import dog.snow.androidrecruittest.SplashActivity.Companion.getDetailList
 import dog.snow.androidrecruittest.SplashActivity.Companion.getRawPhotosList
@@ -48,6 +44,9 @@ class DetailsFragment : Fragment(R.layout.details_fragment){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val inflater = TransitionInflater.from(requireContext())
+        exitTransition = inflater.inflateTransition(R.transition.fade)
+        enterTransition = inflater.inflateTransition(R.transition.slide_right)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

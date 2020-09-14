@@ -5,8 +5,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
-import android.text.format.DateUtils.LENGTH_MEDIUM
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dog.snow.androidrecruittest.repository.model.RawAlbum
@@ -26,14 +24,12 @@ import java.io.IOException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 
 class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
-
     private val LIMIT_OF_PHOTOS:Int = 100
     private val PHOTOS_URL:String = "https://jsonplaceholder.typicode.com/photos?_limit=$LIMIT_OF_PHOTOS"
-    private val SPLASH_SCREEN_MILIS:Long = 5000
+    private val SPLASH_SCREEN_MILIS:Long = 3500
     private val executorService:ExecutorService = Executors.newSingleThreadExecutor()
 
     companion object{
@@ -91,6 +87,7 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
         setContentView(R.layout.splash_activity)
         Handler().postDelayed({
             startActivity(Intent(this,MainActivity::class.java))
+            overridePendingTransition( R.anim.fade_in, R.anim.fade_out );
             finish()
         }, SPLASH_SCREEN_MILIS)
         loadJSONDataUsingExecutorsService()

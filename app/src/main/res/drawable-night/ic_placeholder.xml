@@ -1,0 +1,20 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="38dp"
+    android:height="38dp"
+    android:viewportWidth="38"
+    android:viewportHeight="38">
+    <path
+        android:fillColor="@color/sd_color_white"
+        android:pathData="@string/logo_sd_symbol_light_path_1" />
+    <path
+        android:fillColor="@color/sd_color_white"
+        android:pathData="@string/logo_sd_symbol_light_path_2" />
+    <path
+        android:fillColor="@color/sd_color_white"
+        android:pathData="@string/logo_sd_symbol_light_path_3" />
+    <group>
+        <path
+            android:fillColor="@color/sd_color_black_mask"
+            android:pathData="@string/placeholder_mask_path" />
+    </group>
+</vector>
