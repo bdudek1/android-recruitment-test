@@ -1,5 +1,6 @@
 package dog.snow.androidrecruittest
 
+import dog.snow.androidrecruittest.ui.FunHolder.Companion.getRawAlbumsFromURL
 import org.junit.Test
 
 import org.junit.Assert.*

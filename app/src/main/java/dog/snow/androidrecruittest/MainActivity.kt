@@ -10,9 +10,9 @@ import dog.snow.androidrecruittest.ui.ListFragment
 class MainActivity : AppCompatActivity(R.layout.main_activity){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-                    supportFragmentManager.beginTransaction()
-                                  .replace(R.id.container, ListFragment.newInstance(), ListFragment.TAG)
-                                  .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                                  .commit()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.container, ListFragment.newInstance(), ListFragment.TAG)
+            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+            .commit()
     }
 }

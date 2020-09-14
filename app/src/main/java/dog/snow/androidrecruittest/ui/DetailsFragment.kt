@@ -21,6 +21,12 @@ import dog.snow.androidrecruittest.ui.model.ListItem
 
 class DetailsFragment : Fragment(R.layout.details_fragment){
     protected lateinit var rootView: View
+    private lateinit var img: ImageView
+    private lateinit var imgTitle:TextView
+    private lateinit var albumTitle:TextView
+    private lateinit var userName:TextView
+    private lateinit var email:TextView
+    private lateinit var phone:TextView
 
     companion object {
         const val POSITION: String = "position"
@@ -46,13 +52,17 @@ class DetailsFragment : Fragment(R.layout.details_fragment){
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         rootView = inflater.inflate(R.layout.details_fragment, container, false)
+        initDetailsFragmet()
+        return rootView
+    }
 
-        val img: ImageView = rootView.findViewById(R.id.iv_photo)
-        val imgTitle:TextView = rootView.findViewById(R.id.tv_photo_title)
-        val albumTitle:TextView = rootView.findViewById(R.id.tv_album_title)
-        val userName:TextView = rootView.findViewById(R.id.tv_username)
-        val email:TextView = rootView.findViewById(R.id.tv_email)
-        val phone:TextView = rootView.findViewById(R.id.tv_phone)
+    private fun initDetailsFragmet(){
+        img = rootView.findViewById(R.id.iv_photo)
+        imgTitle = rootView.findViewById(R.id.tv_photo_title)
+        albumTitle = rootView.findViewById(R.id.tv_album_title)
+        userName = rootView.findViewById(R.id.tv_username)
+        email = rootView.findViewById(R.id.tv_email)
+        phone = rootView.findViewById(R.id.tv_phone)
 
         val currentDetail: Detail = getDetailList()?.filter{a->a.photoTitle.equals(clickedItem.title)}!!.single()
         imgTitle.setText(clickedItem.title)
@@ -60,17 +70,12 @@ class DetailsFragment : Fragment(R.layout.details_fragment){
         userName.setText(currentDetail.username)
         email.setText(currentDetail.email)
         phone.setText(currentDetail.phone)
-        img.setImageDrawable(getResources().getDrawable(R.drawable.ic_placeholder))
         val index = getRawPhotosList()?.filter{a->a.title.equals(clickedItem.title)}?.single()!!.id-1
         try{
             img.setImageBitmap(getBitmapList()?.get(index))
         }catch(e:IndexOutOfBoundsException){
+            img.setImageDrawable(getResources().getDrawable(R.drawable.ic_placeholder))
             println(e.message)
         }
-
-        return rootView
     }
-
-
-
 }

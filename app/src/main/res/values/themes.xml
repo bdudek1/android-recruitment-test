@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Base.AppTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+    <style name="Base.AppTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar"/>
 
-    <style name="AppTheme" parent="Base.AppTheme" />
+    <style name="AppTheme" parent="Base.AppTheme">
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorPrimaryDark">@color/color_primary_dark</item>
+        <item name="colorAccent">@color/color_accent</item>
+        <item name="android:windowBackground">@color/color_background</item>
+        <item name="colorError">@color/color_error</item>
+        <item name="colorSurface">@color/color_surface</item>
+    </style>
 
     <style name="AppTheme.SplashTheme" />
 

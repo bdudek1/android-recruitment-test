@@ -1,7 +1,5 @@
 package dog.snow.androidrecruittest.ui
 
-import android.annotation.SuppressLint
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -14,26 +12,24 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import androidx.recyclerview.widget.DefaultItemAnimator
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.*
 import com.google.android.material.textfield.TextInputEditText
 import dog.snow.androidrecruittest.R
 import dog.snow.androidrecruittest.SplashActivity.Companion.getItemList
 import dog.snow.androidrecruittest.ui.model.ListItem
 
+
 class ListFragment : Fragment(R.layout.list_fragment){
     private lateinit var rootView: View
-
-    //private lateinit var viewAdapter: dog.snow.androidrecruittest.ui.adapter.ListAdapter
-    private lateinit var viewManager: androidx.recyclerview.widget.LinearLayoutManager
+    private lateinit var emptyString:TextView
+    private lateinit var photosView:RecyclerView
 
     companion object {
         val POSITION: String = "position"
         var TAG = ListFragment::class.java.simpleName
-        lateinit var viewAdapter: dog.snow.androidrecruittest.ui.adapter.ListAdapter
-        lateinit var searchText: TextInputEditText
+        private lateinit var viewAdapter: dog.snow.androidrecruittest.ui.adapter.ListAdapter
+        private lateinit var viewManager: androidx.recyclerview.widget.LinearLayoutManager
+        private lateinit var searchText: TextInputEditText
 
         fun newInstance(): ListFragment {
             val fragment = ListFragment()
@@ -59,28 +55,38 @@ class ListFragment : Fragment(R.layout.list_fragment){
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         rootView = inflater.inflate(R.layout.list_fragment, container, false)
-        viewManager = LinearLayoutManager(this.context)
-        viewAdapter = dog.snow.androidrecruittest.ui.adapter.ListAdapter{
-                item: ListItem, position: Int, view: View ->
-            DetailsFragment.setSelectedItem(item)
-            fragmentManager?.beginTransaction()
-                           ?.replace(R.id.container, DetailsFragment.newInstance(), DetailsFragment.TAG)
-                           ?.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                           ?.addToBackStack(null)?.commit()
+        initListFragment()
+        initListeners()
+        return rootView
+    }
 
-        }
-        val emptyString = rootView.findViewById<TextView>(R.id.tv_empty)
-        searchText = rootView.findViewById<TextInputEditText>(R.id.et_search)
-        val photosView = rootView.findViewById<RecyclerView>(R.id.rv_items)
+    private fun initListFragment(){
+        viewManager = LinearLayoutManager(this.context)
+        emptyString = rootView.findViewById<TextView>(R.id.tv_empty)
         emptyString.visibility = View.GONE
+        searchText = rootView.findViewById<TextInputEditText>(R.id.et_search)
+        photosView = rootView.findViewById<RecyclerView>(R.id.rv_items)
         photosView.layoutManager = LinearLayoutManager(activity)
-        photosView.adapter = viewAdapter
         photosView.itemAnimator = DefaultItemAnimator()
         val itemDecorator:DividerItemDecoration = DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL)
         itemDecorator.setDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.divider)!!)
         photosView.addItemDecoration(itemDecorator)
         photosView.setHasFixedSize(false)
+    }
+
+    private fun initListeners(){
+        viewAdapter = dog.snow.androidrecruittest.ui.adapter.ListAdapter{
+                item: ListItem, position: Int, view: View ->
+            DetailsFragment.setSelectedItem(item)
+            fragmentManager?.beginTransaction()
+                ?.replace(R.id.container, DetailsFragment.newInstance(), DetailsFragment.TAG)
+                ?.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                ?.addToBackStack(null)?.commit()
+
+        }
         viewAdapter.submitList(getItemList())
+        photosView.adapter = viewAdapter
+
         searchText.addTextChangedListener(object : TextWatcher {
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -101,6 +107,5 @@ class ListFragment : Fragment(R.layout.list_fragment){
                 submitListIncludingFilter()
             }
         })
-        return rootView
     }
 }

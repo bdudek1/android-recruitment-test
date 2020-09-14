@@ -5,9 +5,9 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
+import android.text.format.DateUtils.LENGTH_MEDIUM
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentTransaction
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dog.snow.androidrecruittest.repository.model.RawAlbum
 import dog.snow.androidrecruittest.repository.model.RawPhoto
@@ -19,7 +19,6 @@ import dog.snow.androidrecruittest.ui.FunHolder.Companion.getRawAlbumsFromURL
 import dog.snow.androidrecruittest.ui.FunHolder.Companion.getRawUsersFromURL
 import dog.snow.androidrecruittest.ui.FunHolder.Companion.initDetailsList
 import dog.snow.androidrecruittest.ui.FunHolder.Companion.initItemsList
-import dog.snow.androidrecruittest.ui.ListFragment
 import dog.snow.androidrecruittest.ui.model.Detail
 import dog.snow.androidrecruittest.ui.model.ListItem
 import org.json.JSONArray
@@ -34,6 +33,7 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
 
     private val LIMIT_OF_PHOTOS:Int = 100
     private val PHOTOS_URL:String = "https://jsonplaceholder.typicode.com/photos?_limit=$LIMIT_OF_PHOTOS"
+    private val SPLASH_SCREEN_MILIS:Long = 5000
     private val executorService:ExecutorService = Executors.newSingleThreadExecutor()
 
     companion object{
@@ -92,24 +92,15 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
         Handler().postDelayed({
             startActivity(Intent(this,MainActivity::class.java))
             finish()
-        }, 5000)
+        }, SPLASH_SCREEN_MILIS)
         loadJSONDataUsingExecutorsService()
-        //thumbnailBitmapList.size
-        //while(detailsList?.size!! < LIMIT_OF_PHOTOS){
-        //    Thread.sleep(50)
-        //}
-        //setContentView(R.layout.main_activity)
-        //supportFragmentManager.beginTransaction()
-        //                      .replace(R.id.container, ListFragment.newInstance(), ListFragment.TAG)
-         //                     .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
-        //                      .commit()
     }
 
     private fun showError(errorMessage: String?) {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.cant_download_dialog_title)
             .setMessage(getString(R.string.cant_download_dialog_message, errorMessage))
-            .setPositiveButton(R.string.cant_download_dialog_btn_positive) { _, _ -> /*tryAgain()*/ }
+            .setPositiveButton(R.string.cant_download_dialog_btn_positive) { _, _ -> loadJSONDataUsingExecutorsService() }
             .setNegativeButton(R.string.cant_download_dialog_btn_negative) { _, _ -> finish() }
             .create()
             .apply { setCanceledOnTouchOutside(false) }
@@ -144,9 +135,6 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
     fun loadJSONDataUsingExecutorsService(){
         try{
             executorService.execute(loadJSONRunnable)
-            if (!executorService.awaitTermination(100, TimeUnit.MILLISECONDS)) {
-                Toast.makeText(this@SplashActivity, "Loading data...", Toast.LENGTH_SHORT).show()
-            }
         }catch(e:ExecutionException){
             println(e.message)
             showError(e.message)

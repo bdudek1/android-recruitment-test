@@ -153,8 +153,8 @@ class FunHolder{
                     connection.setRequestProperty("User-Agent","Test-app")
                     connection.connect()
                     val input = connection.inputStream
-                    val myBitmap = BitmapFactory.decodeStream(input)
-                    bitmapList.add(myBitmap!!)
+                    val placeholderBitmap = BitmapFactory.decodeStream(input)
+                    bitmapList.add(placeholderBitmap!!)
                     connection.disconnect()
                     if(ifThumbnail){ListFragment.submitListIncludingFilter()}
                 } catch (e: Exception) {
