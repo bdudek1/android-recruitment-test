@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
-    android:background="@color/sd_color_white"
+    android:background="@color/color_primary"
     android:fitsSystemWindows="true"
     app:layout_scrollFlags="scroll|enterAlwaysCollapsed"
     app:logo="@drawable/ic_logo_appbar" >
@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:text="Android Recruit Test"
         android:textSize="24sp"
-        android:textColor="@color/sd_color_black"
+        android:textColor="@color/color_black_white"
         android:textStyle="bold"
         android:layout_gravity="center"
         android:id="@+id/toolbar_title" />

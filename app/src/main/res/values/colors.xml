@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="color_primary">#008577</color>
+    <color name="color_primary">#f2f2f2</color>
     <color name="color_primary_dark">#00574B</color>
     <color name="color_accent">#D81B60</color>
     <color name="color_background">#FFFFFF</color>
     <color name="color_error">#FF0000</color>
     <color name="color_surface">#FFFFFF</color>
+    <color name="color_black_white">#000000</color>
+
 
     <color name="splash_bg">@color/sd_color_white</color>
 </resources>
