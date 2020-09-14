@@ -1,7 +1,5 @@
 package dog.snow.androidrecruittest.ui.adapter
 
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,8 +7,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.squareup.picasso.Picasso
-import com.squareup.picasso.Picasso.LoadedFrom
 import dog.snow.androidrecruittest.R
 import dog.snow.androidrecruittest.SplashActivity.Companion.getRawPhotosList
 import dog.snow.androidrecruittest.SplashActivity.Companion.getThumbnailBitmapList
@@ -39,11 +35,11 @@ class ListAdapter(private val onClick: (item: ListItem, position: Int, view: Vie
             val tvAlbumTitle: TextView = findViewById(R.id.tv_album_title)
             tvTitle.text = item.title
             tvAlbumTitle.text = item.albumTitle
-            ivThumb.setImageDrawable(getResources().getDrawable(R.drawable.ic_placeholder))
             val index:Int = getRawPhotosList()?.filter{a->a.title.equals(item.title)}?.first()!!.id-1
             try{
                 ivThumb.setImageBitmap(getThumbnailBitmapList()?.get(index))
             }catch(e:IndexOutOfBoundsException){
+                ivThumb.setImageDrawable(getResources().getDrawable(R.drawable.ic_placeholder))
                 println(e.message)
             }
 

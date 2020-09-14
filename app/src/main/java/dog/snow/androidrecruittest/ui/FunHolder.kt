@@ -9,6 +9,7 @@ import dog.snow.androidrecruittest.SplashActivity
 import dog.snow.androidrecruittest.repository.model.RawAlbum
 import dog.snow.androidrecruittest.repository.model.RawPhoto
 import dog.snow.androidrecruittest.repository.model.RawUser
+import dog.snow.androidrecruittest.ui.adapter.ListAdapter
 import dog.snow.androidrecruittest.ui.model.Detail
 import dog.snow.androidrecruittest.ui.model.ListItem
 import org.json.JSONArray
@@ -155,6 +156,7 @@ class FunHolder{
                     val myBitmap = BitmapFactory.decodeStream(input)
                     bitmapList.add(myBitmap!!)
                     connection.disconnect()
+                    if(ifThumbnail){ListFragment.submitListIncludingFilter()}
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }

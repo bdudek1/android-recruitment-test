@@ -26,12 +26,14 @@ import dog.snow.androidrecruittest.ui.model.ListItem
 class ListFragment : Fragment(R.layout.list_fragment){
     private lateinit var rootView: View
 
-    private lateinit var viewAdapter: dog.snow.androidrecruittest.ui.adapter.ListAdapter
+    //private lateinit var viewAdapter: dog.snow.androidrecruittest.ui.adapter.ListAdapter
     private lateinit var viewManager: androidx.recyclerview.widget.LinearLayoutManager
 
     companion object {
         val POSITION: String = "position"
         var TAG = ListFragment::class.java.simpleName
+        lateinit var viewAdapter: dog.snow.androidrecruittest.ui.adapter.ListAdapter
+        lateinit var searchText: TextInputEditText
 
         fun newInstance(): ListFragment {
             val fragment = ListFragment()
@@ -40,6 +42,14 @@ class ListFragment : Fragment(R.layout.list_fragment){
             fragment.arguments = args
             return fragment
         }
+
+        fun submitListIncludingFilter(){
+            val filterText:String = searchText.text.toString()
+            viewAdapter.submitList(getItemList()?.filter{
+                    a -> a.albumTitle.contains(filterText) ||
+                    a.title.contains(filterText)})
+        }
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,7 +70,7 @@ class ListFragment : Fragment(R.layout.list_fragment){
 
         }
         val emptyString = rootView.findViewById<TextView>(R.id.tv_empty)
-        val searchText = rootView.findViewById<TextInputEditText>(R.id.et_search)
+        searchText = rootView.findViewById<TextInputEditText>(R.id.et_search)
         val photosView = rootView.findViewById<RecyclerView>(R.id.rv_items)
         emptyString.visibility = View.GONE
         photosView.layoutManager = LinearLayoutManager(activity)
@@ -88,10 +98,7 @@ class ListFragment : Fragment(R.layout.list_fragment){
             @RequiresApi(Build.VERSION_CODES.N)
             override fun onTextChanged(s: CharSequence, start: Int,
                                        before: Int, count: Int) {
-                val filterText:String = searchText.text.toString()
-                viewAdapter.submitList(getItemList()?.filter{
-                                    a -> a.albumTitle.contains(filterText) ||
-                                         a.title.contains(filterText)})
+                submitListIncludingFilter()
             }
         })
         return rootView
