@@ -8,7 +8,6 @@ import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Adapter
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
@@ -30,8 +29,8 @@ class ListFragment : Fragment(R.layout.list_fragment){
     companion object {
         val POSITION: String = "position"
         var TAG = ListFragment::class.java.simpleName
-        private lateinit var viewAdapter: dog.snow.androidrecruittest.ui.adapter.ListAdapter
-        private lateinit var viewManager: androidx.recyclerview.widget.LinearLayoutManager
+        private lateinit var viewAdapter: ListAdapter
+        private lateinit var viewManager: LinearLayoutManager
         private lateinit var searchText: TextInputEditText
 
         fun newInstance(): ListFragment {
