@@ -2,11 +2,12 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/banner"
+    android:background="@color/color_error"
     style="@style/Widget.AppTheme.Banner"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:text="@string/offline_mode"
     android:textAlignment="center"
-    android:textColor="@color/color_error"
+    android:textColor="@color/color_primary_dark"
     android:visibility="gone"
     tools:visibility="visible" />
