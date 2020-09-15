@@ -14,8 +14,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dog.snow.androidrecruittest.SplashActivity.Companion.getBitmapList
 import dog.snow.androidrecruittest.SplashActivity.Companion.getLimitOfPhotos
 import dog.snow.androidrecruittest.SplashActivity.Companion.loadAndSaveData
-import dog.snow.androidrecruittest.ui.ConnectivityReceiver
-import dog.snow.androidrecruittest.ui.FunHolder
 import dog.snow.androidrecruittest.ui.ListFragment
 import java.util.concurrent.RejectedExecutionException
 
@@ -29,9 +27,8 @@ class MainActivity : AppCompatActivity(R.layout.main_activity), ConnectivityRece
         super.onCreate(savedInstanceState)
         registerReceiver(ConnectivityReceiver(), IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         val toolbar = findViewById<AppBarLayout>(R.id.toolbar)
-        bannerOffline = toolbar.findViewById<TextView>(R.id.banner)
+        bannerOffline = toolbar.findViewById(R.id.banner)
         initShowErrorTimer()
-
         supportFragmentManager.beginTransaction()
             .replace(R.id.container, ListFragment.newInstance(), ListFragment.TAG)
             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)

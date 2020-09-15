@@ -1,10 +1,11 @@
-package dog.snow.androidrecruittest.ui
+package dog.snow.androidrecruittest
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.ConnectivityManager
 import com.google.gson.Gson
+import dog.snow.androidrecruittest.SplashActivity.Companion.PHOTOS_URL
 import dog.snow.androidrecruittest.SplashActivity.Companion.getAlbumIdLimit
 import dog.snow.androidrecruittest.SplashActivity.Companion.getBitmapList
 import dog.snow.androidrecruittest.SplashActivity.Companion.getDetailList
@@ -27,6 +28,7 @@ import dog.snow.androidrecruittest.SplashActivity.Companion.setUserIdLimit
 import dog.snow.androidrecruittest.repository.model.RawAlbum
 import dog.snow.androidrecruittest.repository.model.RawPhoto
 import dog.snow.androidrecruittest.repository.model.RawUser
+import dog.snow.androidrecruittest.ui.ListFragment
 import dog.snow.androidrecruittest.ui.model.Detail
 import dog.snow.androidrecruittest.ui.model.ListItem
 import org.json.JSONArray
@@ -47,8 +49,7 @@ class FunHolder{
             val rawGeo: RawUser.RawAddress.RawGeo =
                 RawUser.RawAddress.RawGeo(
                     JSONObject(getJsonFromURL(URL)).getJSONObject("address").getJSONObject("geo").getString("lat"),
-                    JSONObject(getJsonFromURL(URL)).getJSONObject("address").getJSONObject("geo").getString("lng")
-                )
+                    JSONObject(getJsonFromURL(URL)).getJSONObject("address").getJSONObject("geo").getString("lng"))
 
             return rawGeo
         }
@@ -60,9 +61,7 @@ class FunHolder{
                     JSONObject(getJsonFromURL(URL)).getJSONObject("address").getString("street"),
                     JSONObject(getJsonFromURL(URL)).getJSONObject("address").getString("suite"),
                     JSONObject(getJsonFromURL(URL)).getJSONObject("address").getString("city"),
-                    JSONObject(getJsonFromURL(URL)).getJSONObject("address").getString("zipcode"),
-                    getRawGeoFromURL(index)
-                )
+                    JSONObject(getJsonFromURL(URL)).getJSONObject("address").getString("zipcode"), getRawGeoFromURL(index))
 
             return rawAddress
         }
@@ -82,14 +81,13 @@ class FunHolder{
             val rawUsersList = mutableListOf<RawUser>()
             for(i in 1..size){
                 val URL:String = "https://jsonplaceholder.typicode.com/users/$i"
-                rawUsersList.add(RawUser(JSONObject(getJsonFromURL(URL)).getInt("id"),
+                rawUsersList.add(RawUser(
+                    JSONObject(getJsonFromURL(URL)).getInt("id"),
                     JSONObject(getJsonFromURL(URL)).getString("name"),
                     JSONObject(getJsonFromURL(URL)).getString("username"),
-                    JSONObject(getJsonFromURL(URL)).getString("email"),
-                    getRawAddressFromURL(i),
+                    JSONObject(getJsonFromURL(URL)).getString("email"), getRawAddressFromURL(i),
                     JSONObject(getJsonFromURL(URL)).getString("phone"),
-                    JSONObject(getJsonFromURL(URL)).getString("website"),
-                    getRawCompanyFromURL(i)))
+                    JSONObject(getJsonFromURL(URL)).getString("website"), getRawCompanyFromURL(i)))
             }
 
             return rawUsersList
@@ -99,11 +97,11 @@ class FunHolder{
             val rawAlbumsList = mutableListOf<RawAlbum>()
             for(i in 1..size){
                 val URL:String = "https://jsonplaceholder.typicode.com/albums/$i"
-                rawAlbumsList.add(
-                    RawAlbum(JSONObject(getJsonFromURL(URL)).getInt("id"),
+                rawAlbumsList.add(RawAlbum(
+                        JSONObject(getJsonFromURL(URL)).getInt("id"),
                         JSONObject(getJsonFromURL(URL)).getInt("userId"),
-                        JSONObject(getJsonFromURL(URL)).getString("title"))
-                )
+                        JSONObject(getJsonFromURL(URL)).getString("title")))
+
                 if(getUserIdLimit() < JSONObject(getJsonFromURL(URL)).getInt("userId"))
                     setUserIdLimit(JSONObject(getJsonFromURL(URL)).getInt("userId"))
             }
@@ -116,8 +114,7 @@ class FunHolder{
             val itemsList:MutableList<ListItem> = mutableListOf()
             for(photo in photos){
                 val albumTitle:String = albums.filter{a -> a.id.equals(photo.albumId)}.single().title
-                itemsList.add(ListItem(photo.id, photo.title,
-                albumTitle, photo.thumbnailUrl))
+                itemsList.add(ListItem(photo.id, photo.title, albumTitle, photo.thumbnailUrl))
             }
 
             return itemsList
@@ -145,13 +142,12 @@ class FunHolder{
         fun extractRawPhotosFromJSONArray(jsonArray: JSONArray?):MutableList<RawPhoto>{
             val rawPhotoList = mutableListOf<RawPhoto>()
             for(i in 0 until jsonArray!!.length()){
-                rawPhotoList.add(
-                    RawPhoto(jsonArray.getJSONObject(i).getInt("id"),
+                rawPhotoList.add(RawPhoto(jsonArray.getJSONObject(i).getInt("id"),
                         jsonArray.getJSONObject(i).getInt("albumId"),
                         jsonArray.getJSONObject(i).getString("title"),
                         jsonArray.getJSONObject(i).getString("url"),
-                        jsonArray.getJSONObject(i).getString("thumbnailUrl"))
-                )
+                        jsonArray.getJSONObject(i).getString("thumbnailUrl")))
+
                 if(getAlbumIdLimit() < jsonArray.getJSONObject(i).getInt("albumId"))
                     setAlbumIdLimit(jsonArray.getJSONObject(i).getInt("albumId"))
             }
@@ -173,7 +169,9 @@ class FunHolder{
                     val placeholderBitmap = BitmapFactory.decodeStream(input)
                     bitmapList.add(placeholderBitmap!!)
                     connection.disconnect()
-                    if(ifThumbnail){ListFragment.submitListIncludingFilter()}
+                    if(ifThumbnail){
+                        ListFragment.submitListIncludingFilter()
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -287,12 +285,22 @@ class FunHolder{
             return detailList
         }
 
+        fun getDataFromURL(){
+            setRawPhotosList(extractRawPhotosFromJSONArray(JSONArray(getJsonFromURL(PHOTOS_URL))))
+            setRawAlbumsList(getRawAlbumsFromURL(getAlbumIdLimit()))
+            setRawUsersList(getRawUsersFromURL(getUserIdLimit()))
+            setItemList(initItemsList(getRawPhotosList()!!, getRawAlbumsList()!!))
+            setDetailsList(initDetailsList(getRawPhotosList()!!, getRawAlbumsList()!!, getRawUsersList()!!))
+            setThumbnailBitmapList(extractBitmapsFromRawPhotos(getRawPhotosList()!!, true))
+            setBitmapList(extractBitmapsFromRawPhotos(getRawPhotosList()!!, false))
+        }
+
         fun saveJSONDataToCache(cacheDir:String){
-            getRawPhotosList()?.forEach{ a -> writeRawPhotoToCache(cacheDir + "/photo" + a.id.toString(),a)}
-            getRawAlbumsList()?.forEach{ a -> writeRawAlbumToCache(cacheDir + "/album" + a.id.toString(),a)}
-            getRawUsersList()?.forEach{ a -> writeRawUserToCache(cacheDir + "/user" + a.id.toString(),a)}
-            getItemList()?.forEach{ a -> writeListItemToCache(cacheDir + "/listItem" + a.id.toString(),a)}
-            getDetailList()?.forEach{ a -> writeDetailToCache(cacheDir + "/detail" + a.photoId.toString(),a)}
+            getRawPhotosList()?.forEach{ a -> writeRawPhotoToCache(cacheDir + "/photo" + a.id.toString(), a) }
+            getRawAlbumsList()?.forEach{ a -> writeRawAlbumToCache(cacheDir + "/album" + a.id.toString(), a) }
+            getRawUsersList()?.forEach{ a -> writeRawUserToCache(cacheDir + "/user" + a.id.toString(), a) }
+            getItemList()?.forEach{ a -> writeListItemToCache(cacheDir + "/listItem" + a.id.toString(), a) }
+            getDetailList()?.forEach{ a -> writeDetailToCache(cacheDir + "/detail" + a.photoId.toString(), a) }
         }
 
         fun readJSONDataFromCache(cacheDir:String){

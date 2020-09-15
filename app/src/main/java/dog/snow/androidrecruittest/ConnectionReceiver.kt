@@ -1,4 +1,4 @@
-package dog.snow.androidrecruittest.ui
+package dog.snow.androidrecruittest
 
 import android.content.BroadcastReceiver
 import android.content.Context

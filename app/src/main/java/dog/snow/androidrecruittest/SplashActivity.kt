@@ -4,24 +4,24 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dog.snow.androidrecruittest.repository.model.RawAlbum
 import dog.snow.androidrecruittest.repository.model.RawPhoto
 import dog.snow.androidrecruittest.repository.model.RawUser
-import dog.snow.androidrecruittest.ui.FunHolder.Companion.extractBitmapsFromRawPhotos
-import dog.snow.androidrecruittest.ui.FunHolder.Companion.extractRawPhotosFromJSONArray
-import dog.snow.androidrecruittest.ui.FunHolder.Companion.getJsonFromURL
-import dog.snow.androidrecruittest.ui.FunHolder.Companion.getRawAlbumsFromURL
-import dog.snow.androidrecruittest.ui.FunHolder.Companion.getRawUsersFromURL
-import dog.snow.androidrecruittest.ui.FunHolder.Companion.initDetailsList
-import dog.snow.androidrecruittest.ui.FunHolder.Companion.initItemsList
-import dog.snow.androidrecruittest.ui.FunHolder.Companion.isNetworkAvailable
-import dog.snow.androidrecruittest.ui.FunHolder.Companion.readDataFromCache
-import dog.snow.androidrecruittest.ui.FunHolder.Companion.saveBitmapListToCache
-import dog.snow.androidrecruittest.ui.FunHolder.Companion.saveJSONDataToCache
+import dog.snow.androidrecruittest.FunHolder.Companion.extractBitmapsFromRawPhotos
+import dog.snow.androidrecruittest.FunHolder.Companion.extractRawPhotosFromJSONArray
+import dog.snow.androidrecruittest.FunHolder.Companion.getDataFromURL
+import dog.snow.androidrecruittest.FunHolder.Companion.getJsonFromURL
+import dog.snow.androidrecruittest.FunHolder.Companion.getRawAlbumsFromURL
+import dog.snow.androidrecruittest.FunHolder.Companion.getRawUsersFromURL
+import dog.snow.androidrecruittest.FunHolder.Companion.initDetailsList
+import dog.snow.androidrecruittest.FunHolder.Companion.initItemsList
+import dog.snow.androidrecruittest.FunHolder.Companion.isNetworkAvailable
+import dog.snow.androidrecruittest.FunHolder.Companion.readDataFromCache
+import dog.snow.androidrecruittest.FunHolder.Companion.saveBitmapListToCache
+import dog.snow.androidrecruittest.FunHolder.Companion.saveJSONDataToCache
 import dog.snow.androidrecruittest.ui.model.Detail
 import dog.snow.androidrecruittest.ui.model.ListItem
 import org.json.JSONArray
@@ -37,7 +37,7 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
     companion object{
         private lateinit var cacheDirString:String
         private val LIMIT_OF_PHOTOS:Int = 100
-        private val PHOTOS_URL:String = "https://jsonplaceholder.typicode.com/photos?_limit=$LIMIT_OF_PHOTOS"
+        val PHOTOS_URL:String = "https://jsonplaceholder.typicode.com/photos?_limit=$LIMIT_OF_PHOTOS"
         private val executorService:ExecutorService = Executors.newSingleThreadExecutor()
         private var albumIdLimit:Int = 0
         private var userIdLimit:Int = 0
@@ -126,19 +126,17 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
             return LIMIT_OF_PHOTOS
         }
 
+        private fun saveDataToCache(){
+            saveJSONDataToCache(cacheDirString)
+            saveBitmapListToCache(cacheDirString, thumbnailBitmapList!!, true);
+            saveBitmapListToCache(cacheDirString, bitmapList!!, false)
+        }
+
         fun loadAndSaveData(){
             Thread {
                 try{
-                    rawPhotosList = extractRawPhotosFromJSONArray(JSONArray(getJsonFromURL(PHOTOS_URL)))
-                    rawAlbumList = getRawAlbumsFromURL(albumIdLimit)
-                    rawUsersList = getRawUsersFromURL(userIdLimit)
-                    itemsList = initItemsList(rawPhotosList!!, rawAlbumList!!)
-                    detailsList = initDetailsList(rawPhotosList!!, rawAlbumList!!, rawUsersList!!)
-                    thumbnailBitmapList = extractBitmapsFromRawPhotos(rawPhotosList!!, true)
-                    bitmapList = extractBitmapsFromRawPhotos(rawPhotosList!!, false)
-                    saveJSONDataToCache(cacheDirString)
-                    saveBitmapListToCache(cacheDirString, thumbnailBitmapList!!, true);
-                    saveBitmapListToCache(cacheDirString, bitmapList!!, false)
+                    getDataFromURL()
+                    saveDataToCache()
                 }catch(e:IOException){
                     println(e.message)
                 }
@@ -186,17 +184,23 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
     private fun tryToGetData(isUserConnected:Boolean){
         val gotCachedData:Boolean = readDataFromCache(cacheDirString)
         if(isUserConnected || gotCachedData){
-            Handler().postDelayed({
-                startActivity(Intent(this,MainActivity::class.java))
-                overridePendingTransition( R.anim.fade_in, R.anim.fade_out )
-                finish()
-            }, SPLASH_SCREEN_MILIS)
+            initLoadingScreen()
+
             if(!gotCachedData)
             loadJSONDataUsingExecutorsService()
+
         }else if(!gotCachedData){
             showError("No internet connection detected.",
                 { tryToGetData(isNetworkAvailable(applicationContext)) })
         }
+    }
+
+    private fun initLoadingScreen(){
+        Handler().postDelayed({
+            startActivity(Intent(this,MainActivity::class.java))
+            overridePendingTransition( R.anim.fade_in, R.anim.fade_out )
+            finish()
+        }, SPLASH_SCREEN_MILIS)
     }
 
 }
