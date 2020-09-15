@@ -8,6 +8,7 @@ import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Adapter
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.*
 import com.google.android.material.textfield.TextInputEditText
 import dog.snow.androidrecruittest.R
 import dog.snow.androidrecruittest.SplashActivity.Companion.getItemList
+import dog.snow.androidrecruittest.ui.adapter.ListAdapter
 import dog.snow.androidrecruittest.ui.model.ListItem
 
 
@@ -89,6 +91,11 @@ class ListFragment : Fragment(R.layout.list_fragment){
 
         }
         viewAdapter.submitList(getItemList())
+        viewAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                (photosView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(positionStart, 0)
+            }
+        })
         photosView.adapter = viewAdapter
 
         searchText.addTextChangedListener(object : TextWatcher {
