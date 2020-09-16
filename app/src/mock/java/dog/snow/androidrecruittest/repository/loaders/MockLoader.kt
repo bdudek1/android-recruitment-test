@@ -9,7 +9,6 @@ class MockLoader private constructor() {
             loadJsonFromResource(assetName)
         } catch (e: IOException) {
             println("MockLoader exception: $e")
-            ""
         }
     }
 

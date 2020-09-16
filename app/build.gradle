@@ -7,6 +7,7 @@ apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
+
     defaultConfig {
         applicationId "dog.snow.androidrecruittest"
         minSdkVersion 21
@@ -25,6 +26,7 @@ android {
         api {
             dimension "api"
         }
+        prod
     }
     buildTypes {
         debug {

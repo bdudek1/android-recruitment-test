@@ -1,20 +1,20 @@
 package dog.snow.androidrecruittest
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import dog.snow.androidrecruittest.repository.model.RawAlbum
-import dog.snow.androidrecruittest.repository.model.RawPhoto
-import dog.snow.androidrecruittest.repository.model.RawUser
+import dog.snow.androidrecruittest.FunHolder.Companion.checkIfCacheDataAvailable
 import dog.snow.androidrecruittest.FunHolder.Companion.getDataFromURL
 import dog.snow.androidrecruittest.FunHolder.Companion.isNetworkAvailable
 import dog.snow.androidrecruittest.FunHolder.Companion.readDataFromCache
 import dog.snow.androidrecruittest.FunHolder.Companion.saveBitmapListToCache
 import dog.snow.androidrecruittest.FunHolder.Companion.saveJSONDataToCache
+import dog.snow.androidrecruittest.repository.model.RawAlbum
+import dog.snow.androidrecruittest.repository.model.RawPhoto
+import dog.snow.androidrecruittest.repository.model.RawUser
 import dog.snow.androidrecruittest.ui.model.Detail
 import dog.snow.androidrecruittest.ui.model.ListItem
 import java.io.IOException
@@ -24,12 +24,50 @@ import java.util.concurrent.Executors
 
 
 class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
-    private val SPLASH_SCREEN_MILIS:Long = 4000
+
+    override fun onCreate(savedInstanceState: Bundle?){
+        super.onCreate(savedInstanceState)
+        cacheDirString = cacheDir.toString()
+        setContentView(R.layout.splash_activity)
+        tryToGetData(isNetworkAvailable(applicationContext))
+    }
+
+    private fun showError(errorMessage: String?,  lambda: () -> Unit) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.cant_download_dialog_title)
+            .setMessage(getString(R.string.cant_download_dialog_message, errorMessage))
+            .setPositiveButton(R.string.cant_download_dialog_btn_positive) { _, _ -> lambda() }
+            .setNegativeButton(R.string.cant_download_dialog_btn_negative) { _, _ -> finish() }
+            .create()
+            .apply { setCanceledOnTouchOutside(false) }
+            .show()
+    }
+
+    private fun tryToGetData(isUserConnected:Boolean){
+        if(checkIfCacheDataAvailable(cacheDirString)){
+            initLoadingScreen(2500)
+            readDataFromCache(cacheDirString)
+        }else if(isUserConnected){
+            initLoadingScreen(4000)
+            loadDataAndSaveToCacheUsingExecutorsService()
+        }else if(!isUserConnected){
+            showError("No internet connection detected.")
+            { tryToGetData(isNetworkAvailable(applicationContext)) }
+        }
+    }
+
+    private fun initLoadingScreen(milisToInitFragment:Long){
+        Handler().postDelayed({
+            startActivity(Intent(this,MainActivity::class.java))
+            overridePendingTransition( R.anim.fade_in, R.anim.fade_out )
+            finish()
+        }, milisToInitFragment)
+    }
 
     companion object{
         private lateinit var cacheDirString:String
-        private val LIMIT_OF_PHOTOS:Int = 100
-        val PHOTOS_URL:String = "https://jsonplaceholder.typicode.com/photos?_limit=$LIMIT_OF_PHOTOS"
+        private const val LIMIT_OF_PHOTOS:Int = 100
+        private const val PHOTOS_URL:String = "https://jsonplaceholder.typicode.com/photos?_limit=$LIMIT_OF_PHOTOS"
         private val executorService:ExecutorService = Executors.newSingleThreadExecutor()
         private var albumIdLimit:Int = 0
         private var userIdLimit:Int = 0
@@ -41,6 +79,14 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
         private var rawAlbumList:MutableList<RawAlbum>? = mutableListOf()
         private var rawUsersList:MutableList<RawUser>? = mutableListOf()
 
+        fun getPhotosUrl():String{
+            return PHOTOS_URL
+        }
+
+        fun getLimitOfPhotos():Int{
+            return LIMIT_OF_PHOTOS
+        }
+
         fun getAlbumIdLimit():Int{
             return albumIdLimit
         }
@@ -49,12 +95,16 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
             return userIdLimit
         }
 
-        fun setAlbumIdLimit(limit:Int){
-            albumIdLimit = limit
+        fun getRawPhotosList():MutableList<RawPhoto>?{
+            return rawPhotosList
         }
 
-        fun setUserIdLimit(limit:Int){
-            userIdLimit = limit
+        fun getRawAlbumsList():MutableList<RawAlbum>?{
+            return rawAlbumList
+        }
+
+        fun getRawUsersList():MutableList<RawUser>?{
+            return rawUsersList
         }
 
         fun getItemList():MutableList<ListItem>?{
@@ -73,16 +123,12 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
             return thumbnailBitmapList
         }
 
-        fun getRawPhotosList():MutableList<RawPhoto>?{
-            return rawPhotosList
+        fun setAlbumIdLimit(limit:Int){
+            albumIdLimit = limit
         }
 
-        fun getRawAlbumsList():MutableList<RawAlbum>?{
-            return rawAlbumList
-        }
-
-        fun getRawUsersList():MutableList<RawUser>?{
-            return rawUsersList
+        fun setUserIdLimit(limit:Int){
+            userIdLimit = limit
         }
 
         fun setRawPhotosList(rawPhotosList:MutableList<RawPhoto>){
@@ -113,18 +159,15 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
             this.thumbnailBitmapList = thumbnailBitmapList
         }
 
-
-        fun getLimitOfPhotos():Int{
-            return LIMIT_OF_PHOTOS
-        }
-
+        @Throws(IOException::class)
         private fun saveDataToCache(){
             saveJSONDataToCache(cacheDirString)
-            saveBitmapListToCache(cacheDirString, thumbnailBitmapList!!, true);
+            saveBitmapListToCache(cacheDirString, thumbnailBitmapList!!, true)
             saveBitmapListToCache(cacheDirString, bitmapList!!, false)
         }
 
-        fun loadAndSaveData(){
+        @Throws(InterruptedException::class)
+        fun downloadAndSaveDataToCache(){
             Thread {
                 try{
                     getDataFromURL()
@@ -135,14 +178,14 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
             }.start()
         }
 
-        var loadJSONRunnable = Runnable()
+        private var loadJSONRunnable = Runnable()
         {
-            run(){
-                loadAndSaveData()
+            run {
+                downloadAndSaveDataToCache()
             }
         }
 
-        fun loadJSONDataUsingExecutorsService(){
+        fun loadDataAndSaveToCacheUsingExecutorsService(){
             try{
                 executorService.execute(loadJSONRunnable)
             }catch(e:ExecutionException){
@@ -152,47 +195,4 @@ class SplashActivity : AppCompatActivity(R.layout.splash_activity) {
             }
         }
     }
-
-
-    @SuppressLint("ResourceType")
-    override fun onCreate(savedInstanceState: Bundle?){
-        super.onCreate(savedInstanceState)
-        cacheDirString = cacheDir.toString()
-        setContentView(R.layout.splash_activity)
-        tryToGetData(isNetworkAvailable(applicationContext))
-    }
-
-    private fun showError(errorMessage: String?,  lambda: () -> Unit) {
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.cant_download_dialog_title)
-            .setMessage(getString(R.string.cant_download_dialog_message, errorMessage))
-            .setPositiveButton(R.string.cant_download_dialog_btn_positive) { _, _ -> lambda() }
-            .setNegativeButton(R.string.cant_download_dialog_btn_negative) { _, _ -> finish() }
-            .create()
-            .apply { setCanceledOnTouchOutside(false) }
-            .show()
-    }
-
-    private fun tryToGetData(isUserConnected:Boolean){
-        val gotCachedData:Boolean = readDataFromCache(cacheDirString)
-        if(isUserConnected || gotCachedData){
-            initLoadingScreen()
-
-            if(!gotCachedData)
-            loadJSONDataUsingExecutorsService()
-
-        }else if(!gotCachedData){
-            showError("No internet connection detected.",
-                { tryToGetData(isNetworkAvailable(applicationContext)) })
-        }
-    }
-
-    private fun initLoadingScreen(){
-        Handler().postDelayed({
-            startActivity(Intent(this,MainActivity::class.java))
-            overridePendingTransition( R.anim.fade_in, R.anim.fade_out )
-            finish()
-        }, SPLASH_SCREEN_MILIS)
-    }
-
 }

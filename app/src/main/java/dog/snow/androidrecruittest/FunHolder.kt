@@ -5,16 +5,14 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.ConnectivityManager
 import com.google.gson.Gson
-import dog.snow.androidrecruittest.SplashActivity.Companion.PHOTOS_URL
 import dog.snow.androidrecruittest.SplashActivity.Companion.getAlbumIdLimit
-import dog.snow.androidrecruittest.SplashActivity.Companion.getBitmapList
 import dog.snow.androidrecruittest.SplashActivity.Companion.getDetailList
 import dog.snow.androidrecruittest.SplashActivity.Companion.getItemList
 import dog.snow.androidrecruittest.SplashActivity.Companion.getLimitOfPhotos
+import dog.snow.androidrecruittest.SplashActivity.Companion.getPhotosUrl
 import dog.snow.androidrecruittest.SplashActivity.Companion.getRawAlbumsList
 import dog.snow.androidrecruittest.SplashActivity.Companion.getRawPhotosList
 import dog.snow.androidrecruittest.SplashActivity.Companion.getRawUsersList
-import dog.snow.androidrecruittest.SplashActivity.Companion.getThumbnailBitmapList
 import dog.snow.androidrecruittest.SplashActivity.Companion.getUserIdLimit
 import dog.snow.androidrecruittest.SplashActivity.Companion.setAlbumIdLimit
 import dog.snow.androidrecruittest.SplashActivity.Companion.setBitmapList
@@ -40,94 +38,99 @@ import javax.net.ssl.HttpsURLConnection
 
 class FunHolder{
     companion object{
-        public fun getJsonFromURL(wantedURL: String) : String {
+        private fun getJsonStringFromURL(wantedURL: String) : String {
             return URL(wantedURL).readText()
         }
 
+        @Throws(IOException::class)
         fun getRawGeoFromURL(index:Int): RawUser.RawAddress.RawGeo{
-            val URL:String = "https://jsonplaceholder.typicode.com/users/$index"
-            val rawGeo: RawUser.RawAddress.RawGeo =
-                RawUser.RawAddress.RawGeo(
-                    JSONObject(getJsonFromURL(URL)).getJSONObject("address").getJSONObject("geo").getString("lat"),
-                    JSONObject(getJsonFromURL(URL)).getJSONObject("address").getJSONObject("geo").getString("lng"))
+            val url = "https://jsonplaceholder.typicode.com/users/$index"
 
-            return rawGeo
+            return RawUser.RawAddress.RawGeo(
+                JSONObject(getJsonStringFromURL(url)).getJSONObject("address")
+                                                     .getJSONObject("geo")
+                                                     .getString("lat"),
+                JSONObject(getJsonStringFromURL(url)).getJSONObject("address")
+                                                     .getJSONObject("geo")
+                                                     .getString("lng"))
         }
 
+        @Throws(IOException::class)
         fun getRawAddressFromURL(index:Int): RawUser.RawAddress{
-            val URL:String = "https://jsonplaceholder.typicode.com/users/$index"
-            val rawAddress:RawUser.RawAddress =
-                RawUser.RawAddress(
-                    JSONObject(getJsonFromURL(URL)).getJSONObject("address").getString("street"),
-                    JSONObject(getJsonFromURL(URL)).getJSONObject("address").getString("suite"),
-                    JSONObject(getJsonFromURL(URL)).getJSONObject("address").getString("city"),
-                    JSONObject(getJsonFromURL(URL)).getJSONObject("address").getString("zipcode"), getRawGeoFromURL(index))
+            val url = "https://jsonplaceholder.typicode.com/users/$index"
 
-            return rawAddress
+            return RawUser.RawAddress(
+                JSONObject(getJsonStringFromURL(url)).getJSONObject("address").getString("street"),
+                JSONObject(getJsonStringFromURL(url)).getJSONObject("address").getString("suite"),
+                JSONObject(getJsonStringFromURL(url)).getJSONObject("address").getString("city"),
+                JSONObject(getJsonStringFromURL(url)).getJSONObject("address").getString("zipcode"),
+                getRawGeoFromURL(index)
+            )
         }
 
+        @Throws(IOException::class)
         fun getRawCompanyFromURL(index:Int): RawUser.RawCompany {
-            val URL:String = "https://jsonplaceholder.typicode.com/users/$index"
-            val rawCompany:RawUser.RawCompany =
-                RawUser.RawCompany(
-                    JSONObject(getJsonFromURL(URL)).getJSONObject("company").getString("name"),
-                    JSONObject(getJsonFromURL(URL)).getJSONObject("company").getString("catchPhrase"),
-                    JSONObject(getJsonFromURL(URL)).getJSONObject("company").getString("bs"))
+            val url = "https://jsonplaceholder.typicode.com/users/$index"
 
-            return rawCompany
+            return RawUser.RawCompany(
+                JSONObject(getJsonStringFromURL(url)).getJSONObject("company").getString("name"),
+                JSONObject(getJsonStringFromURL(url)).getJSONObject("company").getString("catchPhrase"),
+                JSONObject(getJsonStringFromURL(url)).getJSONObject("company").getString("bs"))
         }
 
+        @Throws(IOException::class)
         fun getRawUsersFromURL(size:Int):MutableList<RawUser>{
             val rawUsersList = mutableListOf<RawUser>()
             for(i in 1..size){
-                val URL:String = "https://jsonplaceholder.typicode.com/users/$i"
+                val url = "https://jsonplaceholder.typicode.com/users/$i"
                 rawUsersList.add(RawUser(
-                    JSONObject(getJsonFromURL(URL)).getInt("id"),
-                    JSONObject(getJsonFromURL(URL)).getString("name"),
-                    JSONObject(getJsonFromURL(URL)).getString("username"),
-                    JSONObject(getJsonFromURL(URL)).getString("email"), getRawAddressFromURL(i),
-                    JSONObject(getJsonFromURL(URL)).getString("phone"),
-                    JSONObject(getJsonFromURL(URL)).getString("website"), getRawCompanyFromURL(i)))
+                    JSONObject(getJsonStringFromURL(url)).getInt("id"),
+                    JSONObject(getJsonStringFromURL(url)).getString("name"),
+                    JSONObject(getJsonStringFromURL(url)).getString("username"),
+                    JSONObject(getJsonStringFromURL(url)).getString("email"), getRawAddressFromURL(i),
+                    JSONObject(getJsonStringFromURL(url)).getString("phone"),
+                    JSONObject(getJsonStringFromURL(url)).getString("website"), getRawCompanyFromURL(i)))
             }
 
             return rawUsersList
         }
 
+        @Throws(IOException::class)
         fun getRawAlbumsFromURL(size:Int):MutableList<RawAlbum>{
             val rawAlbumsList = mutableListOf<RawAlbum>()
             for(i in 1..size){
-                val URL:String = "https://jsonplaceholder.typicode.com/albums/$i"
+                val url = "https://jsonplaceholder.typicode.com/albums/$i"
                 rawAlbumsList.add(RawAlbum(
-                        JSONObject(getJsonFromURL(URL)).getInt("id"),
-                        JSONObject(getJsonFromURL(URL)).getInt("userId"),
-                        JSONObject(getJsonFromURL(URL)).getString("title")))
+                        JSONObject(getJsonStringFromURL(url)).getInt("id"),
+                        JSONObject(getJsonStringFromURL(url)).getInt("userId"),
+                        JSONObject(getJsonStringFromURL(url)).getString("title")))
 
-                if(getUserIdLimit() < JSONObject(getJsonFromURL(URL)).getInt("userId"))
-                    setUserIdLimit(JSONObject(getJsonFromURL(URL)).getInt("userId"))
+                if(getUserIdLimit() < JSONObject(getJsonStringFromURL(url)).getInt("userId"))
+                    setUserIdLimit(JSONObject(getJsonStringFromURL(url)).getInt("userId"))
             }
 
             return rawAlbumsList
         }
 
-        fun initItemsList(photos:MutableList<RawPhoto>,
-                          albums:MutableList<RawAlbum>):MutableList<ListItem>{
+        private fun initItemsList(photos:MutableList<RawPhoto>,
+                                  albums:MutableList<RawAlbum>):MutableList<ListItem>{
             val itemsList:MutableList<ListItem> = mutableListOf()
             for(photo in photos){
-                val albumTitle:String = albums.filter{a -> a.id.equals(photo.albumId)}.single().title
+                val albumTitle:String = albums.single { a -> a.id.equals(photo.albumId) }.title
                 itemsList.add(ListItem(photo.id, photo.title, albumTitle, photo.thumbnailUrl))
             }
 
             return itemsList
         }
 
-        fun initDetailsList(photos:MutableList<RawPhoto>,
-                            albums:MutableList<RawAlbum>,
-                            users:MutableList<RawUser>):MutableList<Detail>{
+        private fun initDetailsList(photos:MutableList<RawPhoto>,
+                                    albums:MutableList<RawAlbum>,
+                                    users:MutableList<RawUser>):MutableList<Detail>{
             val detailsList:MutableList<Detail> = mutableListOf()
             for(photo in photos){
-                val albumTitle:String = albums.filter{a -> a.id.equals(photo.albumId)}.single().title
-                val userId:Int = albums.filter{a -> a.id.equals(photo.albumId)}.single().userId
-                val user:RawUser = users.filter {u -> u.id.equals(userId)}.single()
+                val albumTitle:String = albums.single { a -> a.id.equals(photo.albumId) }.title
+                val userId:Int = albums.single { a -> a.id.equals(photo.albumId) }.userId
+                val user:RawUser = users.single { u -> u.id.equals(userId) }
                 val username:String = user.username
                 val email:String = user.email
                 val phone:String = user.phone
@@ -139,7 +142,7 @@ class FunHolder{
             return detailsList
         }
 
-        fun extractRawPhotosFromJSONArray(jsonArray: JSONArray?):MutableList<RawPhoto>{
+        private fun extractRawPhotosFromJSONArray(jsonArray: JSONArray?):MutableList<RawPhoto>{
             val rawPhotoList = mutableListOf<RawPhoto>()
             for(i in 0 until jsonArray!!.length()){
                 rawPhotoList.add(RawPhoto(jsonArray.getJSONObject(i).getInt("id"),
@@ -155,12 +158,11 @@ class FunHolder{
             return rawPhotoList
         }
 
+        @Throws(IOException::class)
         fun extractBitmapsFromRawPhotos(rawPhotos:MutableList<RawPhoto>, ifThumbnail:Boolean):MutableList<Bitmap>{
             val bitmapList:MutableList<Bitmap> = mutableListOf()
             for(photo in rawPhotos){
-                var url:URL
-                if(ifThumbnail) url = URL(photo.thumbnailUrl) else url = URL(photo.url)
-                try {
+                val url:URL = if(ifThumbnail) URL(photo.thumbnailUrl) else URL(photo.url)
                     val connection = url.openConnection() as HttpsURLConnection
                     connection.doInput = true
                     connection.setRequestProperty("User-Agent","Test-app")
@@ -172,13 +174,11 @@ class FunHolder{
                     if(ifThumbnail){
                         ListFragment.submitListIncludingFilter()
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
                 }
-            }
             return bitmapList
         }
 
+        @Throws(IOException::class)
         fun writeRawAlbumToCache(s:String, jsonObject:RawAlbum) {
             val gson = Gson()
             val jsonString:String = gson.toJson(jsonObject)
@@ -186,6 +186,7 @@ class FunHolder{
             file.writeText(jsonString)
         }
 
+        @Throws(IOException::class)
         fun writeRawPhotoToCache(s:String, jsonObject:RawPhoto) {
             val gson = Gson()
             val jsonString:String = gson.toJson(jsonObject)
@@ -193,6 +194,7 @@ class FunHolder{
             file.writeText(jsonString)
         }
 
+        @Throws(IOException::class)
         fun writeRawUserToCache(s:String, jsonObject:RawUser) {
             val gson = Gson()
             val jsonString:String = gson.toJson(jsonObject)
@@ -200,6 +202,7 @@ class FunHolder{
             file.writeText(jsonString)
         }
 
+        @Throws(IOException::class)
         fun writeListItemToCache(s:String, jsonObject:ListItem) {
             val gson = Gson()
             val jsonString:String = gson.toJson(jsonObject)
@@ -207,6 +210,7 @@ class FunHolder{
             file.writeText(jsonString)
         }
 
+        @Throws(IOException::class)
         fun writeDetailToCache(s:String, jsonObject:Detail) {
             val gson = Gson()
             val jsonString:String = gson.toJson(jsonObject)
@@ -214,11 +218,12 @@ class FunHolder{
             file.writeText(jsonString)
         }
 
+        @Throws(IOException::class)
         fun readRawAlbumsFromCache(cacheDir:String, howMuch:Int):MutableList<RawAlbum> {
-            var gson = Gson()
+            val gson = Gson()
             val rawAlbumList:MutableList<RawAlbum> = mutableListOf()
             for(i in 1..howMuch){
-                val filePath:String = cacheDir + "/album" + i
+                val filePath = "$cacheDir/album$i"
                 val bufferedReader: BufferedReader = File(filePath).bufferedReader()
                 val inputString = bufferedReader.use { it.readText() }
                 val rawAlbum:RawAlbum = gson.fromJson(inputString, RawAlbum::class.java)
@@ -230,11 +235,12 @@ class FunHolder{
             return rawAlbumList
         }
 
+        @Throws(IOException::class)
         fun readRawPhotosFromCache(cacheDir:String, howMuch:Int):MutableList<RawPhoto> {
             val gson = Gson()
             val rawPhotoList:MutableList<RawPhoto> = mutableListOf()
             for(i in 1..howMuch){
-                val filePath:String = cacheDir +"/photo" + i
+                val filePath = "$cacheDir/photo$i"
                 val bufferedReader: BufferedReader = File(filePath).bufferedReader()
                 val inputString = bufferedReader.use { it.readText() }
                 val rawPhoto:RawPhoto= gson.fromJson(inputString, RawPhoto::class.java)
@@ -246,11 +252,12 @@ class FunHolder{
             return rawPhotoList
         }
 
+        @Throws(IOException::class)
         fun readRawUsersFromCache(cacheDir:String, howMuch:Int):MutableList<RawUser> {
             val gson = Gson()
             val rawUserList:MutableList<RawUser> = mutableListOf()
             for(i in 1..howMuch){
-                val filePath:String = cacheDir + "/user" + i
+                val filePath = "$cacheDir/user$i"
                 val bufferedReader: BufferedReader = File(filePath).bufferedReader()
                 val inputString = bufferedReader.use { it.readText() }
                 val rawUser:RawUser= gson.fromJson(inputString, RawUser::class.java)
@@ -259,11 +266,12 @@ class FunHolder{
             return rawUserList
         }
 
+        @Throws(IOException::class)
         fun readListItemsFromCache(cacheDir:String, howMuch:Int):MutableList<ListItem> {
             val gson = Gson()
             val listItemList:MutableList<ListItem> = mutableListOf()
             for(i in 1..howMuch){
-                val filePath:String = cacheDir + "/listItem" + i
+                val filePath = "$cacheDir/listItem$i"
                 val bufferedReader: BufferedReader = File(filePath).bufferedReader()
                 val inputString = bufferedReader.use { it.readText() }
                 val listItem:ListItem= gson.fromJson(inputString, ListItem::class.java)
@@ -272,11 +280,12 @@ class FunHolder{
             return listItemList
         }
 
+        @Throws(IOException::class)
         fun readDetailsFromCache(cacheDir:String, howMuch:Int):MutableList<Detail> {
             val gson = Gson()
             val detailList:MutableList<Detail> = mutableListOf()
             for(i in 1..howMuch){
-                val filePath:String = cacheDir +"/detail" + i
+                val filePath = "$cacheDir/detail$i"
                 val bufferedReader: BufferedReader = File(filePath).bufferedReader()
                 val inputString = bufferedReader.use { it.readText() }
                 val detail:Detail= gson.fromJson(inputString, Detail::class.java)
@@ -285,8 +294,9 @@ class FunHolder{
             return detailList
         }
 
+        @Throws(IOException::class)
         fun getDataFromURL(){
-            setRawPhotosList(extractRawPhotosFromJSONArray(JSONArray(getJsonFromURL(PHOTOS_URL))))
+            setRawPhotosList(extractRawPhotosFromJSONArray(JSONArray(getJsonStringFromURL(getPhotosUrl()))))
             setRawAlbumsList(getRawAlbumsFromURL(getAlbumIdLimit()))
             setRawUsersList(getRawUsersFromURL(getUserIdLimit()))
             setItemList(initItemsList(getRawPhotosList()!!, getRawAlbumsList()!!))
@@ -295,6 +305,7 @@ class FunHolder{
             setBitmapList(extractBitmapsFromRawPhotos(getRawPhotosList()!!, false))
         }
 
+        @Throws(IOException::class)
         fun saveJSONDataToCache(cacheDir:String){
             getRawPhotosList()?.forEach{ a -> writeRawPhotoToCache(cacheDir + "/photo" + a.id.toString(), a) }
             getRawAlbumsList()?.forEach{ a -> writeRawAlbumToCache(cacheDir + "/album" + a.id.toString(), a) }
@@ -303,6 +314,7 @@ class FunHolder{
             getDetailList()?.forEach{ a -> writeDetailToCache(cacheDir + "/detail" + a.photoId.toString(), a) }
         }
 
+        @Throws(IOException::class)
         fun readJSONDataFromCache(cacheDir:String){
             setRawPhotosList(readRawPhotosFromCache(cacheDir, getLimitOfPhotos()))
             setRawAlbumsList(readRawAlbumsFromCache(cacheDir, getAlbumIdLimit()))
@@ -311,38 +323,31 @@ class FunHolder{
             setDetailsList(readDetailsFromCache(cacheDir, getLimitOfPhotos()))
         }
 
+        @Throws(IOException::class)
         fun saveBitmapListToCache(cacheDir:String, bitmapList:MutableList<Bitmap>, isThumbnail:Boolean){
             for (i in 1.. bitmapList.size){
-                var path:String
-                if(isThumbnail){
-                    path = cacheDir + "/thumbnailBitmap" + i
-                }else{
-                    path = cacheDir + "/bitmap" + i
-                }
+                val path:String = if(isThumbnail)"$cacheDir/thumbnailBitmap$i" else "$cacheDir/bitmap$i"
                 val file = File(path)
                 val stream: OutputStream = FileOutputStream(file)
-                bitmapList.get(i-1).compress(Bitmap.CompressFormat.JPEG, 100, stream)
+                bitmapList[i-1].compress(Bitmap.CompressFormat.JPEG, 100, stream)
                 stream.flush()
                 stream.close()
             }
         }
 
+        @Throws(IOException::class)
         fun readBitmapListFromCache(cacheDir:String, howMuch:Int, isThumbnail:Boolean):MutableList<Bitmap>{
             val bitmapList:MutableList<Bitmap> = mutableListOf()
             var path:String
             for(i in 1.. howMuch){
-                if(isThumbnail){
-                    path = cacheDir + "/thumbnailBitmap" + i
-                }else{
-                    path = cacheDir + "/bitmap" + i
-                }
+                path = if(isThumbnail) "$cacheDir/thumbnailBitmap$i" else "$cacheDir/bitmap$i"
                 val bitmap = BitmapFactory.decodeFile(path)
                 bitmapList.add(bitmap)
             }
             return bitmapList
         }
 
-        fun readDataFromCache(cacheDir:String):Boolean{
+        fun readDataFromCache(cacheDir:String){
             try{
                 readJSONDataFromCache(cacheDir)
                 setBitmapList(readBitmapListFromCache(cacheDir, getLimitOfPhotos(), false))
@@ -350,10 +355,6 @@ class FunHolder{
             }catch(e:IOException){
                 println(e.message)
             }
-
-            return getThumbnailBitmapList()?.size == getLimitOfPhotos() &&
-                    getBitmapList()?.size == getLimitOfPhotos() &&
-                    getDetailList()?.size == getLimitOfPhotos()
         }
 
         fun isNetworkAvailable(context: Context): Boolean {
@@ -361,6 +362,12 @@ class FunHolder{
                 context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             return connectivityManager.activeNetworkInfo != null && connectivityManager.activeNetworkInfo
                 .isConnected
+        }
+
+        fun checkIfCacheDataAvailable(cacheDir:String):Boolean{
+            val path = "$cacheDir/bitmap${getLimitOfPhotos()}"
+            val file = File(path)
+            return file.exists()
         }
     }
 }

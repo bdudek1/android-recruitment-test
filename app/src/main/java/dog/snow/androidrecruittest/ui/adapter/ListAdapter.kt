@@ -35,11 +35,11 @@ class ListAdapter(private val onClick: (item: ListItem, position: Int, view: Vie
             val tvAlbumTitle: TextView = findViewById(R.id.tv_album_title)
             tvTitle.text = item.title
             tvAlbumTitle.text = item.albumTitle
-            val index:Int = getRawPhotosList()?.filter{a->a.title.equals(item.title)}?.first()!!.id-1
+            val index:Int = getRawPhotosList()?.first { a -> a.title.equals(item.title) }!!.id-1
             try{
                 ivThumb.setImageBitmap(getThumbnailBitmapList()?.get(index))
             }catch(e:IndexOutOfBoundsException){
-                ivThumb.setImageDrawable(getResources().getDrawable(R.drawable.ic_placeholder))
+                ivThumb.setImageDrawable(resources.getDrawable(R.drawable.ic_placeholder))
                 println(e.message)
             }
 

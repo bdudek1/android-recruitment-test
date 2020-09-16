@@ -16,31 +16,13 @@ import dog.snow.androidrecruittest.ui.model.Detail
 import dog.snow.androidrecruittest.ui.model.ListItem
 
 class DetailsFragment : Fragment(R.layout.details_fragment){
-    protected lateinit var rootView: View
+    private lateinit var rootView: View
     private lateinit var img: ImageView
     private lateinit var imgTitle:TextView
     private lateinit var albumTitle:TextView
     private lateinit var userName:TextView
     private lateinit var email:TextView
     private lateinit var phone:TextView
-
-    companion object {
-        const val POSITION: String = "position"
-        var TAG = DetailsFragment::class.java.simpleName
-        lateinit var clickedItem: ListItem
-
-        fun setSelectedItem(item:ListItem){
-            clickedItem = item
-        }
-
-        fun newInstance(): DetailsFragment {
-            val fragment = DetailsFragment()
-            val args = Bundle()
-            args.putInt(POSITION, 1)
-            fragment.arguments = args
-            return fragment
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,17 +46,35 @@ class DetailsFragment : Fragment(R.layout.details_fragment){
         phone = rootView.findViewById(R.id.tv_phone)
 
         val currentDetail: Detail = getDetailList()?.filter{a->a.photoTitle.equals(clickedItem.title)}!!.single()
-        imgTitle.setText(clickedItem.title)
-        albumTitle.setText(clickedItem.albumTitle)
-        userName.setText(currentDetail.username)
-        email.setText(currentDetail.email)
-        phone.setText(currentDetail.phone)
-        val index = getRawPhotosList()?.filter{a->a.title.equals(clickedItem.title)}?.single()!!.id-1
+        imgTitle.text = clickedItem.title
+        albumTitle.text = clickedItem.albumTitle
+        userName.text = currentDetail.username
+        email.text = currentDetail.email
+        phone.text = currentDetail.phone
+        val index = getRawPhotosList()?.single { a -> a.title.equals(clickedItem.title) }!!.id-1
         try{
             img.setImageBitmap(getBitmapList()?.get(index))
         }catch(e:IndexOutOfBoundsException){
-            img.setImageDrawable(getResources().getDrawable(R.drawable.ic_placeholder))
+            img.setImageDrawable(resources.getDrawable(R.drawable.ic_placeholder))
             println(e.message)
+        }
+    }
+
+    companion object {
+        private const val POSITION: String = "position"
+        val TAG = DetailsFragment::class.java.simpleName
+        lateinit var clickedItem: ListItem
+
+        fun setSelectedItem(item:ListItem){
+            clickedItem = item
+        }
+
+        fun newInstance(): DetailsFragment {
+            val fragment = DetailsFragment()
+            val args = Bundle()
+            args.putInt(POSITION, 1)
+            fragment.arguments = args
+            return fragment
         }
     }
 }

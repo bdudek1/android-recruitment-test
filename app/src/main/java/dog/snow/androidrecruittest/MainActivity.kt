@@ -1,6 +1,5 @@
 package dog.snow.androidrecruittest
 
-import android.annotation.SuppressLint
 import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.Bundle
@@ -11,18 +10,19 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentTransaction
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dog.snow.androidrecruittest.SplashActivity.Companion.downloadAndSaveDataToCache
 import dog.snow.androidrecruittest.SplashActivity.Companion.getBitmapList
 import dog.snow.androidrecruittest.SplashActivity.Companion.getLimitOfPhotos
-import dog.snow.androidrecruittest.SplashActivity.Companion.loadAndSaveData
 import dog.snow.androidrecruittest.ui.ListFragment
-import java.util.concurrent.RejectedExecutionException
 
 
 class MainActivity : AppCompatActivity(R.layout.main_activity), ConnectivityReceiver.ConnectivityReceiverListener{
+
     private lateinit var bannerOffline:TextView
     private lateinit var showErrorTimer: CountDownTimer
-    private val TIME_TO_RETRY_CONNECTION:Long = 600000
-    @SuppressLint("ResourceType")
+    private val TIME_TO_RETRY_CONNECTION:Long = 600000  //10min to showError() after loosing connection
+                                                        //or opening app in offline mode
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         registerReceiver(ConnectivityReceiver(), IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
@@ -54,19 +54,19 @@ class MainActivity : AppCompatActivity(R.layout.main_activity), ConnectivityRece
     private fun reloadDataIfNotLoaded(){
         if(getBitmapList()?.size!! < getLimitOfPhotos())
             try{
-                loadAndSaveData()
-            }catch(e:RejectedExecutionException){
+                downloadAndSaveDataToCache()
+            }catch(e:InterruptedException){
                 println(e.message)
             }
     }
 
-    fun initShowErrorTimer(){
+    private fun initShowErrorTimer(){
         showErrorTimer = object: CountDownTimer(TIME_TO_RETRY_CONNECTION, TIME_TO_RETRY_CONNECTION) {
             override fun onTick(millisUntilFinished: Long) {}
 
             override fun onFinish() {
-                showError("Please make sure that you are connected to the internet.",
-                    { tryToReconnect() })
+                showError("Please make sure that you are connected to the internet."
+                ) { tryToReconnect() }
             }
         }
     }
@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity(R.layout.main_activity), ConnectivityRece
 
     private fun tryToReconnect(){
         if(!FunHolder.isNetworkAvailable(applicationContext))
-            showError("Please make sure that you are connected to the internet.",
-                { tryToReconnect() })
+            showError("Please make sure that you are connected to the internet."
+            ) { tryToReconnect() }
     }
 }
